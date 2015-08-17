@@ -30,7 +30,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<EvidenceDBModel> getAllEvidence() throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/getAllEvidence.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
@@ -57,7 +57,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<DrugDBModel> getAllDrug() throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/getAllEvidence.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
@@ -90,7 +90,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<EvidenceDBModel> getRecentEvidence(@PathParam("num") final String num) throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/getRecentEvidence.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
 	    sql_statement += " LIMIT " + num + ";";
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
@@ -119,7 +119,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<EvidenceDBModel> searchEvidence(@PathParam("label") final String label) throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/searchEvidenceByLabel.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
 	    sql_statement += " '%" + label + "%';";
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
@@ -147,7 +147,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<SourceDBModel> getSourceType(@PathParam("drug") final String drug) throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/getSourceType.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getSourceType.sql");
 	    sql_statement = sql_statement.replaceAll("example", drug);
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
@@ -183,7 +183,7 @@ public class DIKBService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<InfoDBModel> getDrugInfo(@PathParam("drug") final String drug) throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/evidence/localsql/searchEvidenceByLabel.sql");
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
 	    sql_statement += " '%" + drug + "%';";
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
