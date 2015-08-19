@@ -13,6 +13,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.ohdsi.webapi.DIKB.DetailsDBModel;
 import org.ohdsi.webapi.DIKB.DrugDBModel;
 import org.ohdsi.webapi.DIKB.EvidenceDBModel;
 import org.ohdsi.webapi.DIKB.InfoDBModel;
@@ -117,24 +118,26 @@ public class DIKBService {
 	@GET
 	@Path("search/{label}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<EvidenceDBModel> searchEvidence(@PathParam("label") final String label) throws Exception {
+	public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label) throws Exception {
 		
 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
 	    sql_statement += " '%" + label + "%';";
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
-		List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
+		List<DetailsDBModel> evidenceList = new ArrayList<DetailsDBModel>();
 		
 		while(resultSet.next())
 		{
  	    
-			EvidenceDBModel evidence = new EvidenceDBModel();
-			evidence.researchStatementLabel = resultSet.getString("researchStatementLabel");
-			evidence.assertType = resultSet.getString("assertType");
-			evidence.dateAnnotated = resultSet.getString("dateAnnotated");
+			DetailsDBModel evidence = new DetailsDBModel();
+			String assertType = resultSet.getString("assertType");
+			evidence.Object = label;
+			evidence.assertType = assertType;
+			evidence.Precipitant = resultSet.getString("researchStatementLabel").replaceAll(assertType, "").split("__")[1];
 			evidence.evidenceRole = resultSet.getString("evidenceRole");
 			evidence.evidence = resultSet.getString("evidence");
+			evidence.evidenceSource = resultSet.getString("evidenceSource");
 			evidenceList.add(evidence);
  	    
 		}
