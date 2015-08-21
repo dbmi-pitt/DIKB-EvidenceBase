@@ -7,6 +7,9 @@ public class SourceDBModel {
 		  @JsonProperty("name")
 		  public String sourceType;
 		  
+		  @JsonProperty("fullname")
+		  public String fullname;
+		  
 		  @JsonProperty("value")
 		  public int sourceNum;
 		  

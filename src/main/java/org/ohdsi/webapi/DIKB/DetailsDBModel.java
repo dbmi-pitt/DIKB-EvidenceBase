@@ -21,5 +21,8 @@ public class DetailsDBModel {
   
   @JsonProperty("evidenceSource")
   public String evidenceSource;
+  
+  @JsonProperty("evidenceType")
+  public String evidenceType;
 
 }

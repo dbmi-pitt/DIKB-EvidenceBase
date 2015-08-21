@@ -116,12 +116,21 @@ public class DIKBService {
 	}
 	
 	@GET
-	@Path("search/{label}")
+	@Path("search/{label}/{source}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label) throws Exception {
+	public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label, @PathParam("source") final String source) throws Exception {
 		
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	    sql_statement += " '%" + label + "%';";
+		//String source = label.split("+")[1];
+		//String drugname = label.split("%2B")[0];
+	    String sql_statement;
+	    if(source.equalsIgnoreCase("Other"))
+	    {
+	    	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
+	    	sql_statement += " '%" + label + "%' and evidenceType='' order by assertType, researchStatementLabel;";
+	    }else{
+	    	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
+	    	sql_statement += " '%" + label + "%' and evidenceType like '%" + source + "%' order by assertType, researchStatementLabel;";
+	    }
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
@@ -138,6 +147,7 @@ public class DIKBService {
 			evidence.evidenceRole = resultSet.getString("evidenceRole");
 			evidence.evidence = resultSet.getString("evidence");
 			evidence.evidenceSource = resultSet.getString("evidenceSource");
+			evidence.evidenceType = resultSet.getString("evidenceType");
 			evidenceList.add(evidence);
  	    
 		}
@@ -166,17 +176,20 @@ public class DIKBService {
 			if(tempSourceType.length() == 0)
 			{
 				item.sourceType = "Other";
+				item.fullname = "Other";
 			}else{
-				item.sourceType = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
+				item.sourceType = resultSet.getString("tag");
+				item.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
 			}
 			item.sourceNum = resultSet.getInt("num");
 			itemList.add(item);
  	    
 		}
-		SourceDBModel item1 = new SourceDBModel();
+		/*SourceDBModel item1 = new SourceDBModel();
 		item1.sourceType = "EV_EX_Trans_Prot_ID";
+		item1.fullname = "EV_EX_Trans_Prot_ID";
 		item1.sourceNum = 2;
-		itemList.add(item1);
+		itemList.add(item1);*/
 		connection.close();
 		return itemList;	  
 	}

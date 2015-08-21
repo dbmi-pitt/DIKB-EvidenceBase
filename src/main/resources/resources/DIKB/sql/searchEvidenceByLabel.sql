@@ -1,2 +1,2 @@
-SELECT * FROM assertion WHERE researchStatementLabel LIKE 
+SELECT * FROM assertion1 WHERE researchStatementLabel LIKE 
 
