@@ -17,7 +17,9 @@ import org.ohdsi.webapi.DIKB.DetailsDBModel;
 import org.ohdsi.webapi.DIKB.DrugDBModel;
 import org.ohdsi.webapi.DIKB.EvidenceDBModel;
 import org.ohdsi.webapi.DIKB.InfoDBModel;
+import org.ohdsi.webapi.DIKB.OverviewDBModel;
 import org.ohdsi.webapi.DIKB.SourceDBModel;
+import org.ohdsi.webapi.DIKB.TimeDBModel;
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.ohdsi.webapi.source.JdbcUtil;
 import org.springframework.stereotype.Component;
@@ -97,17 +99,42 @@ public class DIKBService {
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
 		List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
-		
+		String tempSourceType;
 		while(resultSet.next())
 		{
  	    
 			EvidenceDBModel evidence = new EvidenceDBModel();
+			tempSourceType = resultSet.getString("evidenceType");
+			if(tempSourceType.length() == 0)
+			{
+				evidence.name = "Other";
+				evidence.fullname = "Other";
+			}else{
+				evidence.name= resultSet.getString("tag");
+				evidence.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
+			}
 			evidence.researchStatementLabel = resultSet.getString("researchStatementLabel");
 			evidence.assertType = resultSet.getString("assertType");
-			evidence.dateAnnotated = resultSet.getString("dateAnnotated");
+			String dateAnnotated = resultSet.getString("dateAnnotated");
+			dateAnnotated = dateAnnotated.replaceAll("-", "");
+			dateAnnotated = dateAnnotated.replaceAll(":", "");
+			dateAnnotated = dateAnnotated.replaceAll(" ", "");
+			dateAnnotated = dateAnnotated.substring(2);
+			dateAnnotated = dateAnnotated.substring(0, dateAnnotated.length()-2);
+			dateAnnotated += "0";
+			evidence.dateAnnotated = dateAnnotated;
 			evidence.evidenceRole = resultSet.getString("evidenceRole");
 			evidence.evidence = resultSet.getString("evidence");
-			evidence.source = resultSet.getString("source");
+			evidence.name = resultSet.getString("tag");
+			evidence.label = resultSet.getString("tag");
+			evidence.object = resultSet.getString("researchStatementLabel").split("_")[0];
+			evidence.value = 1;
+			ArrayList<TimeDBModel> timeList = new ArrayList<TimeDBModel>();
+			
+			TimeDBModel timemodel = new TimeDBModel();
+			timemodel.setTimeDBModel(dateAnnotated, dateAnnotated);
+			timeList.add(timemodel);
+			evidence.times = timeList;
 			evidenceList.add(evidence);
  	    
 		}
@@ -148,6 +175,7 @@ public class DIKBService {
 			evidence.evidence = resultSet.getString("evidence");
 			evidence.evidenceSource = resultSet.getString("evidenceSource");
 			evidence.evidenceType = resultSet.getString("evidenceType");
+			evidence.evidenceStatement = resultSet.getString("evidenceStatement");
 			evidenceList.add(evidence);
  	    
 		}
@@ -218,6 +246,36 @@ public class DIKBService {
 		}
 		connection.close();
 		return infoList;	  
+	}
+	
+	@GET
+	@Path("overview")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<OverviewDBModel> getOverview() throws Exception {
+		
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
+	    sql_statement += " LIMIT 10 ;";
+	    Connection connection = JdbcUtil.getConnection();
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql_statement);
+		List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
+		String researchStatementLabel = null;
+		int countNum = 0;
+		
+		while(resultSet.next())
+		{
+			researchStatementLabel = resultSet.getString(researchStatementLabel);//.split("_")[0];
+			OverviewDBModel overview = new OverviewDBModel();
+			overview.OverviewDrug = researchStatementLabel;
+			overview.OverviewTag = "Drugs with the most recent evidences";
+			overview.OverviewAttribute = resultSet.getString("dateAnnotated");
+			overviewList.add(overview);
+			//overviewList.get(0).OverviewDrug
+			//++countNum;
+ 	    
+		}
+		connection.close();
+		return overviewList;	  
 	}
 	
 	
