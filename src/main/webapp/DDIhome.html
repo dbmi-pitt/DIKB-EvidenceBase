@@ -20,6 +20,27 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js" type="text/javascript"></script>
         <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />
         <STYLE TYPE="text/css" media="all">
+        #drugSelection1{
+    display:block;
+    float:left;
+    padding: 5px;
+    margin-left: 360px;
+    align: center;
+}
+#drugSelection1t{
+    display:block;
+    float:left;
+    padding: 5px;
+    margin-left: 140px;
+    align: center;
+}
+#drugSelection2{
+    display:block;
+    float:left;
+    padding: 5px;
+    margin-left: 30px;
+
+}
             .ui-autocomplete { 
                 position: absolute; 
                 cursor: default; 
@@ -106,10 +127,16 @@ var testData = [];
           // datum is the id object
             var div = $('#hoverRes');
             var colors = chart.colors();
-            div.find('.coloredDiv').css('background-color', colors(i))
-            div.find('#name').text("SourceType: "+datum.name)
-            div.find('#objectname').text(datum.object);
-            div.find('#statement').text(datum.evidenceRole+ ": "+datum.researchStatementLabel);
+            div.find('blockquote').css('border-left', "10px solid "+colors(i));
+            div.find('blockquote').css('box-shadow', "2px 2px 15px #ccc");
+            div.find('blockquote').css('width', "350px");
+            var tempcontent = '';
+            tempcontent = "<a href='"+ datum.evidence + "'>"+datum.evidence+"</a>";
+            div.find('#name').text("SourceType: "+datum.name+"\n");
+            div.find('#objectname').text(datum.evidenceRole+ ": "+datum.researchStatementLabel+'\n');
+            $('#statement').empty();
+            $('#statement').append(tempcontent);
+            //$('#statement').text(datum.evidence);
           })
           .click(function (d, i, datum) {
             //alert(datum.label);
@@ -191,10 +218,71 @@ $(document).ready(function() {
         }
  
     });
+    //alert($("input#autoText").value);
+    $("input#precipitantName").autocomplete({
+      
+      width: 300,
+        max: 10,
+        delay: 100,
+        minLength: 1,
+        autoFocus: true,
+        cacheLength: 1,
+        scroll: true,
+        highlight: false,
+        source: function(request, response) {
+            var query = request.term;
+            $.ajax({
+                url: restBaseUrl + "drug",
+            type: 'GET',
+            dataType: 'json',
+            data: request,
+            contentType: "application/json",
+            crossDomain: true,
+            success: function(data, textStatus, jqXHR) {
+                //var json = JSON.parse(data);
+                var items = [];
+                var tempitem = "Any";
+                var j = 0;
+                //alert(query);
+                items[0] = "Any";
+                for (var i = 1; i < data.length; i++) {
+                    items[i] = data[i].DRUG;
+                    //items[i+1] = tempitem[0];
+                }
+                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+                response( $.grep( items, function( item ){
+                return matcher.test( item );
+          }) );
+            
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert("Something went wrong while getting Index list. Please try again.");
+            }
+                /*url: "/JSON/AjaxRequest",
+                dataType: "json",
+                data: request,
+                success: function( data, textStatus, jqXHR) {
+                    console.log( data);
+                    var items = data;
+                    response(items);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                     console.log( textStatus);
+                }*/
+            });
+        }
+ 
+    });
 });
+
+
 
 function strStartsWith(str, prefix) {
     return str.indexOf(prefix) === 0;
+}
+
+function loadprecipitant(){
+  alert($('input#autoText').val());
 }
     
 </script>
@@ -214,39 +302,63 @@ function strStartsWith(str, prefix) {
             </div>
 
             <form name="as400samplecode" action="javascript:showbar();" method="get">
-                <div class="drugs centered">			
-                    <div align="center">
+                <div id="drugSelection1">			
+                    <div style="margin">
                             <div class="bold centered" style="font-size:16px">Object</div>
-                            <input id="autoText" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/>
+                            <input id="autoText" oninput="loadprecipitant();" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/>
                     </div>
 
                 </div>
                 
-                <div class="test centered">
+                <!--<div id="drugSelection2">
                     <div id="submitButton1">
+                      <br>
+                        <input id="findInteractionsSubmit" class="clear regButton1" type="submit" value="Search"/>
+                    </div>
+                    <div id="warningMessage" class="centered warning"></div>
+                </div>-->
+            
+                <div id="drugSelection2">     
+                    <div style="margin">
+                            <div class="bold centered" style="font-size:16px">Precipitant</div>
+                            <input id="precipitantName" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/>
+                    </div>
+
+                </div>
+                
+                <div id="drugSelection2">
+                    <div id="submitButton1">
+                      <br>
                         <input id="findInteractionsSubmit" class="clear regButton1" type="submit" value="Search"/>
                     </div>
                     <div id="warningMessage" class="centered warning"></div>
                 </div>
             </form>
-            <div class="test centered">
-              <div class="bold centered" style="font-size:16px">Overview</div>
+            <br>
+            <br>
+            <div class="test">
+              <div class="bold" style="font-size:16px;margin-left:150px">Overview</div>
+    <div id="drugSelection1t">
     <div id="timeline2"></div>
+  </div>
     <div id="hoverRes" >
+      <div id="drugSelection2">
+      <blockquote>
       <div class="coloredDiv"></div>
-      <div id="name"></div><br>
-      <div id="objectname" onclick = "showbar()"></div><br>
-      <div id="statement"></div>
+      <div id="name" align="left"></div><br>
+      <div id="objectname" align="left" onclick = "showbar()"></div><br>
+      <div id="statement" align="left"></div>
       <div id="scrolled_date"></div>
+    </blockquote>
+  </div>
     </div>
-
-
             </div>
         </div>
 
 <div class="firstpagemargin">
 
-<div id="figure" style="margin-bottom: 50px;"></div>
+<div id="figure" style="margin-bottom: 10px;"></div>
+<br>
 <h5>Details</h5><div class = "drugselected"></div>
 <div id = "here_table"></div>
 
@@ -257,15 +369,17 @@ function showbar(){
   .remove();
   $("#detailstable").remove();
     var inputvalue = document.getElementById("autoText").value;
+    var precipitantName = document.getElementById("precipitantName").value;
+
     if(inputvalue=="")
       inputvalue = document.getElementById("objectname").text;
-    alert(inputvalue);
+    alert(inputvalue+precipitantName);
     //alert(inputvalue);
     //var data1;
     var datalength;
     var data1;
     $.ajax({
-                
+            
             url: "http://localhost:8080/WebAPI/DIKB/source/"+inputvalue,
             type: 'GET',
             dataType: 'json',
@@ -279,7 +393,7 @@ function showbar(){
                 //alert(data1[1].fullname);
                 var margin = {top: 70, right: 40, bottom: 10, left: 65},
     width = 800 - margin.left - margin.right,
-    height = 200 - margin.top - margin.bottom;  //chart width
+    height = 140 - margin.top - margin.bottom;  //chart width
 
 var y = d3.scale.ordinal()
     .rangeRoundBands([0, height], .3);
@@ -477,7 +591,7 @@ function showtable(clickname,clicksource){
     var inputvalue = document.getElementById("autoText").value;
     var table = $('<table id="detailstable" width="1000px" align="center"></table>');
     var row = $('<tr></tr>');
-    var column  = $('<td>Source</td><td>Object</td><td>Predicate</td><td>Precipitant</td><td>Evidence For</td><td>Evidence Against</td>');
+    var column  = $('<td>Predicate</td><td>Precipitant</td><td>Evidence For</td><td>Evidence Against</td>');
     $('#here_table').append(table);
     row.append(column);
     table.append(row);
@@ -497,17 +611,17 @@ function showtable(clickname,clicksource){
             success: function(data) {
               //alert(clicksource + data.length);
               //alert(data[0].Object);
-                var tempcolumn;
                 
                 for (var i = 0; i < data.length; i++) {
+                  var tempcolumn='';
                   row = $('<tr bgcolor="#FFFFFF"></tr>');
-                  if(i == 0) {
+                  /*if(i == 0) {
                     tempcolumn = "<td>" + clickname + "</td>";
                     tempcolumn += "<td>" + data[i].Object + "</td>";
                   }else{
                     tempcolumn = "<td></td>";
                     tempcolumn += "<td></td>"
-                  }
+                  }*/
 
                   if(i!=0)
                   {
@@ -519,7 +633,7 @@ function showtable(clickname,clicksource){
                   }else{
                     tempcolumn += "<td>" + data[i].assertType + "</td>";
                   }
-
+                  //alert(tempcolumn);
                   if(i!=0)  
                   {
                     if((data[i].Precipitant == data[i-1].Precipitant)&&(data[i].assertType == data[i-1].assertType)){
@@ -537,11 +651,11 @@ function showtable(clickname,clicksource){
                   
                   if(data[i].evidenceRole == "support")
                   {
-                    tempcolumn += "<td bgcolor='#ECF5E1'>" + data[i].evidence + "</td>";
+                    tempcolumn += "<td bgcolor='#ECF5E1'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='"+ data[i].evidence + "'>Link: "+data[i].evidence+"</a></td>";
                     tempcolumn += "<td></td>";
                   }else if(data[i].evidenceRole == "refute"){
                     tempcolumn += "<td></td>";
-                    tempcolumn += "<td bgcolor='#F5E1E2'>" + data[i].evidence + "</td>";
+                    tempcolumn += "<td bgcolor='#F5E1E2'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='"+ data[i].evidence + "'>Link: "+data[i].evidence+"</a></td>";
                   }else{
                     tempcolumn += "<td></td>";
                     tempcolumn += "<td></td>";
@@ -550,6 +664,7 @@ function showtable(clickname,clicksource){
                   column = tempcolumn;
                   row.append(column);
                   table.append(row);
+                  //alert(column);
                   
                 }
                },

@@ -278,5 +278,35 @@ public class DIKBService {
 		return overviewList;	  
 	}
 	
+	@GET
+	@Path("precipitantName")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<OverviewDBModel> getPrecipitantName() throws Exception {
+		
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
+	    sql_statement += " LIMIT 10 ;";
+	    Connection connection = JdbcUtil.getConnection();
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql_statement);
+		List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
+		String researchStatementLabel = null;
+		int countNum = 0;
+		
+		while(resultSet.next())
+		{
+			researchStatementLabel = resultSet.getString(researchStatementLabel);//.split("_")[0];
+			OverviewDBModel overview = new OverviewDBModel();
+			overview.OverviewDrug = researchStatementLabel;
+			overview.OverviewTag = "Drugs with the most recent evidences";
+			overview.OverviewAttribute = resultSet.getString("dateAnnotated");
+			overviewList.add(overview);
+			//overviewList.get(0).OverviewDrug
+			//++countNum;
+ 	    
+		}
+		connection.close();
+		return overviewList;	  
+	}
+	
 	
 }
