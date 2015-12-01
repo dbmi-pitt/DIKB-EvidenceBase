@@ -1,2 +1,2 @@
-SELECT * FROM assertion1;
+SELECT * FROM DIKB;
 

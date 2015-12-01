@@ -48,6 +48,7 @@
                 width: 180px;
                 overflow-y: scroll; 
                 overflow-x: hidden;
+                font-size: 13px;
             }
             .axis path,
             .axis line {
@@ -131,9 +132,10 @@ var testData = [];
             div.find('blockquote').css('box-shadow', "2px 2px 15px #ccc");
             div.find('blockquote').css('width', "350px");
             var tempcontent = '';
-            tempcontent = "<a href='"+ datum.evidence + "'>"+datum.evidence+"</a>";
-            div.find('#name').text("SourceType: "+datum.name+"\n");
-            div.find('#objectname').text(datum.evidenceRole+ ": "+datum.researchStatementLabel+'\n');
+            tempcontent = "<a href='"+ datum.evidence + "' target='_blank'>More Details</a>";
+            div.find('#objectname').text("Time: "+datum.dateAnnotated);
+            div.find('#sourcetype').text("SourceType: "+datum.name);
+            div.find('#name').text(datum.evidenceRole+ ": "+datum.researchStatementLabel+'\n');
             $('#statement').empty();
             $('#statement').append(tempcontent);
             //$('#statement').text(datum.evidence);
@@ -157,6 +159,7 @@ var testData = [];
             });
       
     }
+
 
 $(document).ready(function() {
 
@@ -190,85 +193,32 @@ $(document).ready(function() {
                 var j = 0;
                 //alert(query);
                 items[0] = "Any";
-                for (var i = 1; i < data.length; i++) {
-                    items[i] = data[i].DRUG;
+                for (var i = 1; i < data.length+1; i++) {
+                    items[i] = data[i-1].DRUG;
                     //items[i+1] = tempitem[0];
                 }
+                //talert(request.term);
                 var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
-                response( $.grep( items, function( item ){
-                return matcher.test( item );
-          }) );
+                /*response( $.grep( items, function( item ){
+                    return matcher.test( item );
+                }) );*/
+
+                if(request.term == " ")
+                {
+                    response( $.grep( items, function( item ){
+                        return item;
+                    }) );
+                }else {
+                    response( $.grep( items, function( item ){
+                        return matcher.test( item );
+                    }) );
+                }
             
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 alert("Something went wrong while getting Index list. Please try again.");
             }
-                /*url: "/JSON/AjaxRequest",
-                dataType: "json",
-                data: request,
-                success: function( data, textStatus, jqXHR) {
-                    console.log( data);
-                    var items = data;
-                    response(items);
-                },
-                error: function(jqXHR, textStatus, errorThrown){
-                     console.log( textStatus);
-                }*/
-            });
-        }
- 
-    });
-    //alert($("input#autoText").value);
-    $("input#precipitantName").autocomplete({
-      
-      width: 300,
-        max: 10,
-        delay: 100,
-        minLength: 1,
-        autoFocus: true,
-        cacheLength: 1,
-        scroll: true,
-        highlight: false,
-        source: function(request, response) {
-            var query = request.term;
-            $.ajax({
-                url: restBaseUrl + "drug",
-            type: 'GET',
-            dataType: 'json',
-            data: request,
-            contentType: "application/json",
-            crossDomain: true,
-            success: function(data, textStatus, jqXHR) {
-                //var json = JSON.parse(data);
-                var items = [];
-                var tempitem = "Any";
-                var j = 0;
-                //alert(query);
-                items[0] = "Any";
-                for (var i = 1; i < data.length; i++) {
-                    items[i] = data[i].DRUG;
-                    //items[i+1] = tempitem[0];
-                }
-                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
-                response( $.grep( items, function( item ){
-                return matcher.test( item );
-          }) );
-            
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                alert("Something went wrong while getting Index list. Please try again.");
-            }
-                /*url: "/JSON/AjaxRequest",
-                dataType: "json",
-                data: request,
-                success: function( data, textStatus, jqXHR) {
-                    console.log( data);
-                    var items = data;
-                    response(items);
-                },
-                error: function(jqXHR, textStatus, errorThrown){
-                     console.log( textStatus);
-                }*/
+
             });
         }
  
@@ -282,7 +232,74 @@ function strStartsWith(str, prefix) {
 }
 
 function loadprecipitant(){
-  alert($('input#autoText').val());
+  var inputObject = $('input#autoText').val();
+  //alert($('select[id="autoText"]').val());
+  //alert(inputObject);
+  $("input#precipitantName").autocomplete({
+      
+      width: 300,
+        max: 10,
+        delay: 100,
+        minLength: 1,
+        autoFocus: true,
+        cacheLength: 1,
+        scroll: true,
+        highlight: false,
+        source: function(request, response) {
+            var query = request.term;
+            $.ajax({
+                url: "http://localhost:8080/WebAPI/DIKB/precipitant/" + inputObject,
+            type: 'GET',
+            dataType: 'json',
+            data: request,
+            contentType: "application/json",
+            crossDomain: true,
+            success: function(data, textStatus, jqXHR) {
+                //var json = JSON.parse(data);
+                var items = [];
+                var tempitem = "Any";
+                var j = 0;
+                //alert(query);
+                //items[0] = "Any";
+                for (var i = 1; i < data.length+1; i++) {
+                    items[i] = data[i-1].DRUG;
+                    //items[i+1] = tempitem[0];
+                }
+                var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( request.term ), "i" );
+                /*response( $.grep( items, function( item ){
+                    return matcher.test( item );
+                }) );*/
+                if(request.term == " ")
+                {
+                    response( $.grep( items, function( item ){
+                        return item;
+                    }) );
+                }else {
+                    response( $.grep( items, function( item ){
+                        return matcher.test( item );
+                    }) );
+                }
+
+            
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert("Something went wrong while getting Index list. Please try again.");
+            }
+                /*url: "/JSON/AjaxRequest",
+                dataType: "json",
+                data: request,
+                success: function( data, textStatus, jqXHR) {
+                    console.log( data);
+                    var items = data;
+                    response(items);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                     console.log( textStatus);
+                }*/
+            });
+        }
+ 
+    });
 }
     
 </script>
@@ -295,17 +312,17 @@ function loadprecipitant(){
             <header>
                 <h3 class="centered" style = "font-size:37px">DIKB Evidence Base</h3>
             </header>		
-            <div class="intro">
+            <!--<div class="intro">
                 <p class = "lead" style = "font-size:16px"> A service provided by the University of Pittsburgh <a href="http://dikb.org">Drug Interaction Knowledge Base (DIKB)</a>
 		</p>
 	
-            </div>
+            </div>-->
 
             <form name="as400samplecode" action="javascript:showbar();" method="get">
                 <div id="drugSelection1">			
                     <div style="margin">
-                            <div class="bold centered" style="font-size:16px">Object</div>
-                            <input id="autoText" oninput="loadprecipitant();" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/>
+                            <div class="bold centered" style="font-size:16px">
+                            Object &nbsp<input id="autoText" maxlength="20" value = "" onclick = "returnall()" defaultValue = "any" placeholder = "Any"/></div>
                     </div>
 
                 </div>
@@ -320,15 +337,14 @@ function loadprecipitant(){
             
                 <div id="drugSelection2">     
                     <div style="margin">
-                            <div class="bold centered" style="font-size:16px">Precipitant</div>
-                            <input id="precipitantName" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/>
+                            <div class="bold centered" style="font-size:16px">
+                            Precipitant &nbsp<input id="precipitantName" onclick="loadprecipitant();" maxlength="20" value = "" defaultValue = "any" placeholder = "Any"/></div>
                     </div>
 
                 </div>
                 
                 <div id="drugSelection2">
                     <div id="submitButton1">
-                      <br>
                         <input id="findInteractionsSubmit" class="clear regButton1" type="submit" value="Search"/>
                     </div>
                     <div id="warningMessage" class="centered warning"></div>
@@ -337,50 +353,48 @@ function loadprecipitant(){
             <br>
             <br>
             <div class="test">
-              <div class="bold" style="font-size:16px;margin-left:150px">Overview</div>
+              <div class="bold" style="font-size:16px;margin-left:150px" id="overview">Recent Evidence</div>
     <div id="drugSelection1t">
     <div id="timeline2"></div>
   </div>
     <div id="hoverRes" >
       <div id="drugSelection2">
-      <blockquote>
+
       <div class="coloredDiv"></div>
-      <div id="name" align="left"></div><br>
-      <div id="objectname" align="left" onclick = "showbar()"></div><br>
+      <blockquote>
+      <div id="name" align="left"></div>
+      <div id="objectname" align="left" onclick = "showbar()"></div>
+      <div id="sourcetype" align="left"></div>
       <div id="statement" align="left"></div>
       <div id="scrolled_date"></div>
-    </blockquote>
+        </blockquote>
   </div>
     </div>
             </div>
         </div>
-
+<br>
 <div class="firstpagemargin">
 
-<div id="figure" style="margin-bottom: 10px;"></div>
-<br>
-<h5>Details</h5><div class = "drugselected"></div>
+<div id="figure" style="margin-bottom: 5px;"></div>
+
+<div class = "drugselected"></div>
 <div id = "here_table"></div>
 
 <script>
-function showbar(){
+
+function drawd3diagram(inputvalue,precipitantName){
   $("#hoverRes").remove();
+  document.getElementById("overview").innerHTML = "";
+  d3.select("svg")
+  .remove();
   d3.select("svg")
   .remove();
   $("#detailstable").remove();
-    var inputvalue = document.getElementById("autoText").value;
-    var precipitantName = document.getElementById("precipitantName").value;
-
-    if(inputvalue=="")
-      inputvalue = document.getElementById("objectname").text;
-    alert(inputvalue+precipitantName);
-    //alert(inputvalue);
-    //var data1;
-    var datalength;
+  var datalength;
     var data1;
     $.ajax({
             
-            url: "http://localhost:8080/WebAPI/DIKB/source/"+inputvalue,
+            url: "http://localhost:8080/WebAPI/DIKB/source/"+inputvalue+"/"+precipitantName,
             type: 'GET',
             dataType: 'json',
             contentType: "application/json",
@@ -392,8 +406,8 @@ function showbar(){
                 data1 = data;
                 //alert(data1[1].fullname);
                 var margin = {top: 70, right: 40, bottom: 10, left: 65},
-    width = 800 - margin.left - margin.right,
-    height = 140 - margin.top - margin.bottom;  //chart width
+    width = 600 - margin.left - margin.right,
+    height = 105 - margin.top - margin.bottom;  //chart width
 
 var y = d3.scale.ordinal()
     .rangeRoundBands([0, height], .3);
@@ -493,7 +507,7 @@ data1.forEach(function(d) {
   var bars = vakken.selectAll("rect")
       .data(function(d) { return d.boxes; })
     .enter().append("g").attr("class", "subbar")
-     .on('mousedown', function(d) {showtable(d.name,d.fullname); });
+     .on('mousedown', function(d) {showtable(d.name,d.fullname,precipitantName,inputvalue); this.style("font-size","30px")});
 
 
 //------------------------bar-----------------------------------d.x0, d.x1, d.name
@@ -532,10 +546,18 @@ data1.forEach(function(d) {
       .attr("x2", x(0))
       .attr("y2", height);
 
+    svg.append("text")
+      .attr("x", -60)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "begin")
+      .style("font" ,"10px sans-serif")
+      .text(function(d) { return precipitantName; });
+
 //-------------------------legend-----------------------------
   var startp = svg.append("g").attr("class", "legendbox").attr("id", "mylegendbox");
   // this is not nice, we should calculate the bounding box and use that
-  var legend_tabs = [0, 20, 40, 60, 80,100,120,140,160];
+  var legend_tabs = [60, 45, 30, 15, 0, 100];
   var legend = startp.selectAll(".legend")
       .data(color.domain().slice())
       .enter().append("g")
@@ -546,8 +568,10 @@ data1.forEach(function(d) {
   legend.append("rect")
       .attr("x", 0)
       .attr("width", 18)
-      .attr("height", 18)
+      .attr("height", 10)
       .style("fill", color);
+
+
 
   legend.append("text")
       .attr("x", 22)
@@ -578,20 +602,82 @@ data1.forEach(function(d) {
             }
                 
             });
+}
 
+
+function showbar(){
+  $(".drugselected").text("");
+  $("#hoverRes").remove();
+  document.getElementById("overview").innerHTML = "";
+  //d3.select("#figure").removeChild();
+  d3.select("svg")
+  .remove();
+  $("#detailstable").remove();
+    var inputvalue = document.getElementById("autoText").value;
+    var precipitantName = document.getElementById("precipitantName").value;
+
+    if(inputvalue=="")
+      inputvalue = document.getElementById("objectname").text;
+    if(precipitantName=="") {
+      //alert(precipitantName);
+      $.ajax({
+            url: "http://localhost:8080/WebAPI/DIKB/precipitant/"+inputvalue,
+            type: 'GET',
+            dataType: 'json',
+            contentType: "application/json",
+            crossDomain: true,
+            success: function(data) {
+                //var json = JSON.parse(data);
+                var length = 0;
+                //alert(data.length);
+                if(data.length>5)
+                    length = 5;
+                else
+                    length = data.length;
+                for (var i = 0;i < length; i++) {
+                    //alert(data[i].DRUG);
+                    //items[i+1] = tempitem[0];
+                    drawd3diagram(inputvalue,data[i].DRUG);
+                }
+                
+          //}) );
+            
+            },
+            error: function(data) {
+                alert("Something went wrong while getting Index list. Please try again.");
+            }
+                /*url: "/JSON/AjaxRequest",
+                dataType: "json",
+                data: request,
+                success: function( data, textStatus, jqXHR) {
+                    console.log( data);
+                    var items = data;
+                    response(items);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                     console.log( textStatus);
+                }*/
+            });
+    }else{
+    //alert(inputvalue+precipitantName);
+    //alert(inputvalue);
+    //var data1;
+    drawd3diagram(inputvalue,precipitantName);
+  }
 //var data1 = [{"name":"Other","value":1},{"name":"EV_PK_DDI_Par_Grps","value":1},{"name":"EV_PK_DDI_RCT","value":1},{"name":"Non_traceable_Drug_Label_Statement","value":2},{"name":"Non_traceable_Drug","value":2}];
 
 
 }
 
-function showtable(clickname,clicksource){
+function showtable(clickname,clicksource,precipitantName,objectName){
     var clicktext = clicksource;
     $("#detailstable").remove();
-    $(".drugselected").text(clickname);
+    //alert(clickname+","+clicksource+","+precipitantName+","+objectName);
+    $(".drugselected").text("Details: " + clickname+"-"+objectName+"-"+precipitantName);
     var inputvalue = document.getElementById("autoText").value;
     var table = $('<table id="detailstable" width="1000px" align="center"></table>');
     var row = $('<tr></tr>');
-    var column  = $('<td>Predicate</td><td>Precipitant</td><td>Evidence For</td><td>Evidence Against</td>');
+    var column  = $('<td>Predicate</td><td>Precipitant</td><td>Evidence Standpoint</td><td width="1200px">Evidence Content</td>');
     $('#here_table').append(table);
     row.append(column);
     table.append(row);
@@ -603,7 +689,7 @@ function showtable(clickname,clicksource){
     //document.write("    <td valign = 'top'>Evidence Against</td>");
     $.ajax({
                 
-            url: "http://localhost:8080/WebAPI/DIKB/search/" + inputvalue + "/" + clicksource,
+            url: "http://localhost:8080/WebAPI/DIKB/search/" + inputvalue + "/" + precipitantName + "/" + clicksource,
             type: 'GET',
             dataType: 'json',
             contentType: "application/json",
@@ -628,10 +714,10 @@ function showtable(clickname,clicksource){
                     if(data[i].assertType == data[i-1].assertType){
                       tempcolumn += "<td></td>";
                     }else{
-                      tempcolumn += "<td>" + data[i].assertType + "</td>";
+                      tempcolumn += "<td>" + data[i].assertType.replace("_"," ") + "</td>";
                     }
                   }else{
-                    tempcolumn += "<td>" + data[i].assertType + "</td>";
+                    tempcolumn += "<td>" + data[i].assertType.replace("_"," ") + "</td>";
                   }
                   //alert(tempcolumn);
                   if(i!=0)  
@@ -651,11 +737,11 @@ function showtable(clickname,clicksource){
                   
                   if(data[i].evidenceRole == "support")
                   {
-                    tempcolumn += "<td bgcolor='#ECF5E1'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='"+ data[i].evidence + "'>Link: "+data[i].evidence+"</a></td>";
-                    tempcolumn += "<td></td>";
+                    tempcolumn += "<td>Support</td>";
+                    tempcolumn += "<td bgcolor='#ECF5E1'  align='left' style='line-height:15px;padding-left:7px'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='details.html?"+data[i].evidence+"'  target='_blank' color='blue'>More Details</a></td>";
                   }else if(data[i].evidenceRole == "refute"){
-                    tempcolumn += "<td></td>";
-                    tempcolumn += "<td bgcolor='#F5E1E2'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='"+ data[i].evidence + "'>Link: "+data[i].evidence+"</a></td>";
+                    tempcolumn += "<td>Refute</td>";
+                    tempcolumn += "<td bgcolor='#F5E1E2' align='left' margin-left='10px' style='line-height:15px;padding-left:7px'>" + data[i].evidenceStatement.substring(0,350) + "...<br><a href='details.html?"+data[i].evidence+"' target='_blank' color='blue'>More Details</a></td>";
                   }else{
                     tempcolumn += "<td></td>";
                     tempcolumn += "<td></td>";
@@ -716,6 +802,11 @@ challenge task: Extraction of Drug-Drug Interactions from biomedical texts,” 2
 </ul>
 
 <BR>-->
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
 <h5>License</h5>
 <div class = "lead" style = "font-size:13px">
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/3.0/88x31.png" /></a><br/>

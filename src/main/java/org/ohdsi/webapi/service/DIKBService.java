@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.ohdsi.webapi.DIKB.DetailsDBModel;
 import org.ohdsi.webapi.DIKB.DrugDBModel;
 import org.ohdsi.webapi.DIKB.EvidenceDBModel;
+import org.ohdsi.webapi.DIKB.EvidenceDetailsDBModel;
 import org.ohdsi.webapi.DIKB.InfoDBModel;
 import org.ohdsi.webapi.DIKB.OverviewDBModel;
 import org.ohdsi.webapi.DIKB.SourceDBModel;
@@ -79,8 +80,45 @@ public class DIKBService {
 				DrugDBModel item = new DrugDBModel();
 				item.drugName = (tempdrug.split("_"))[0];
 				drugList.add(item);
+				filter.add((tempdrug.split("_"))[0]);
 			}
-			filter.add((tempdrug.split("_"))[0]);
+		}
+		connection.close();
+		return drugList;	  
+	}
+	
+	@GET
+	@Path("precipitant/{object}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<DrugDBModel> getPrecipitant(@PathParam("object") final String object) throws Exception {
+		
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getPrecipitant.sql");
+	    sql_statement = sql_statement.replaceAll("example", object);
+		Connection connection = JdbcUtil.getConnection();
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql_statement);
+		List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
+		List<String> filter = new ArrayList<String>();
+		String tempdrug;
+		String tempfilter = "";
+		
+		while(resultSet.next())
+		{
+ 	    
+			tempdrug = resultSet.getString("researchStatementLabel");
+			DrugDBModel item = new DrugDBModel();
+			String[] temp = tempdrug.split("_");
+			int length = temp.length;
+			
+			if(!filter.contains((tempdrug.split("_"))[length-1]))
+			{
+				
+				tempfilter = (tempdrug.split("_"))[length-1];
+				item.drugName = (tempdrug.split("_"))[length-1];
+				drugList.add(item);
+				filter.add(tempfilter);
+			}
+			
 		}
 		connection.close();
 		return drugList;	  
@@ -100,6 +138,7 @@ public class DIKBService {
 		ResultSet resultSet = statement.executeQuery(sql_statement);
 		List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
 		String tempSourceType;
+		
 		while(resultSet.next())
 		{
  	    
@@ -113,16 +152,18 @@ public class DIKBService {
 				evidence.name= resultSet.getString("tag");
 				evidence.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
 			}
-			evidence.researchStatementLabel = resultSet.getString("researchStatementLabel");
+			evidence.researchStatementLabel = resultSet.getString("researchStatementLabel").replaceAll("_", " ");
 			evidence.assertType = resultSet.getString("assertType");
 			String dateAnnotated = resultSet.getString("dateAnnotated");
 			dateAnnotated = dateAnnotated.replaceAll("-", "");
 			dateAnnotated = dateAnnotated.replaceAll(":", "");
 			dateAnnotated = dateAnnotated.replaceAll(" ", "");
+			dateAnnotated = dateAnnotated.replaceAll("/", "");
 			dateAnnotated = dateAnnotated.substring(2);
-			dateAnnotated = dateAnnotated.substring(0, dateAnnotated.length()-2);
-			dateAnnotated += "0";
-			evidence.dateAnnotated = dateAnnotated;
+			dateAnnotated = dateAnnotated.substring(3, dateAnnotated.length()-3);
+			dateAnnotated += "000";
+			String tempDate = resultSet.getString("dateAnnotated");
+			evidence.dateAnnotated = tempDate.substring(0, tempDate.length()-1);
 			evidence.evidenceRole = resultSet.getString("evidenceRole");
 			evidence.evidence = resultSet.getString("evidence");
 			evidence.name = resultSet.getString("tag");
@@ -143,9 +184,9 @@ public class DIKBService {
 	}
 	
 	@GET
-	@Path("search/{label}/{source}")
+	@Path("search/{label}/{precipitant}/{source}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label, @PathParam("source") final String source) throws Exception {
+	public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label,@PathParam("precipitant") final String precipitant, @PathParam("source") final String source) throws Exception {
 		
 		//String source = label.split("+")[1];
 		//String drugname = label.split("%2B")[0];
@@ -153,10 +194,10 @@ public class DIKBService {
 	    if(source.equalsIgnoreCase("Other"))
 	    {
 	    	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	    	sql_statement += " '%" + label + "%' and evidenceType='' order by assertType, researchStatementLabel;";
+	    	sql_statement += " '" + label + "_%' and researchStatementLabel LIKE '%_" + precipitant + "' and evidenceType='' order by assertType, researchStatementLabel;";
 	    }else{
 	    	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	    	sql_statement += " '%" + label + "%' and evidenceType like '%" + source + "%' order by assertType, researchStatementLabel;";
+	    	sql_statement += " '" + label + "_%' and researchStatementLabel LIKE '%_" + precipitant + "' and evidenceType like '%" + source + "%' order by assertType, researchStatementLabel;";
 	    }
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
@@ -172,7 +213,7 @@ public class DIKBService {
 			evidence.assertType = assertType;
 			evidence.Precipitant = resultSet.getString("researchStatementLabel").replaceAll(assertType, "").split("__")[1];
 			evidence.evidenceRole = resultSet.getString("evidenceRole");
-			evidence.evidence = resultSet.getString("evidence");
+			evidence.evidence = resultSet.getString("evidence").replaceAll("https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/", "");
 			evidence.evidenceSource = resultSet.getString("evidenceSource");
 			evidence.evidenceType = resultSet.getString("evidenceType");
 			evidence.evidenceStatement = resultSet.getString("evidenceStatement");
@@ -184,12 +225,13 @@ public class DIKBService {
 	}
 	
 	@GET
-	@Path("source/{drug}")
+	@Path("source/{drug}/{precipitant}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<SourceDBModel> getSourceType(@PathParam("drug") final String drug) throws Exception {
+	public Collection<SourceDBModel> getSourceType(@PathParam("drug") final String drug, @PathParam("precipitant") final String precipitant) throws Exception {
 		
 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getSourceType.sql");
-	    sql_statement = sql_statement.replaceAll("example", drug);
+	    sql_statement = sql_statement.replaceAll("example1", drug);
+	    sql_statement = sql_statement.replaceAll("example2", precipitant);
 		Connection connection = JdbcUtil.getConnection();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(sql_statement);
@@ -306,6 +348,41 @@ public class DIKBService {
 		}
 		connection.close();
 		return overviewList;	  
+	}
+	
+	@GET
+	@Path("evidenceDetails/{evidenceID}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<EvidenceDetailsDBModel> getEvidenceDetails(@PathParam("evidenceID") final String evidenceID) throws Exception {
+		
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getEvidenceDetails.sql");
+	    sql_statement += "'https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/" + evidenceID + "';";
+		Connection connection = JdbcUtil.getConnection();
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(sql_statement);
+		List<EvidenceDetailsDBModel> detailsList = new ArrayList<EvidenceDetailsDBModel>();
+		
+		while(resultSet.next())
+		{
+ 	    
+			EvidenceDetailsDBModel item = new EvidenceDetailsDBModel();
+			item.evidenceStatement = resultSet.getString("evidenceStatement");
+			item.label = resultSet.getString("label");
+			item.asrt = resultSet.getString("asrt");
+			item.dateAnnotated = resultSet.getString("dateAnnotated");
+			item.whoAnnotated = resultSet.getString("whoAnnotated");
+			item.evidence = resultSet.getString("evidence");
+			item.evidenceRole = resultSet.getString("evidenceRole");
+			item.evidenceSource = resultSet.getString("evidenceSource");
+			item.numOfSubjects = resultSet.getInt("numOfSubjects");
+			item.objectDose = resultSet.getInt("objectDose");
+			item.precipDose = resultSet.getInt("precipDose");
+			item.evidenceVal = resultSet.getString("evidenceVal");
+			item.tag = resultSet.getString("tag");
+			detailsList.add(item);
+		}
+		connection.close();
+		return detailsList;	  
 	}
 	
 	

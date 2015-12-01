@@ -315,21 +315,22 @@ text-align:center;
 
 .regButton1{
     background: #90afc2;
-    background-image: -webkit-linear-gradient(top, #90afc2, #4c768f);
-    background-image: -moz-linear-gradient(top, #90afc2, #4c768f);
-    background-image: -ms-linear-gradient(top, #90afc2, #4c768f);
-    background-image: -o-linear-gradient(top, #90afc2, #4c768f);
-    background-image: linear-gradient(to bottom, #90afc2, #4c768f);
-    -webkit-border-radius: 9;
-    -moz-border-radius: 9;
-    border-radius: 8px;
+    //background-image: -webkit-linear-gradient(top, #90afc2, #4c768f);
+    //background-image: -moz-linear-gradient(top, #90afc2, #4c768f);
+    //background-image: -ms-linear-gradient(top, #90afc2, #4c768f);
+    //background-image: -o-linear-gradient(top, #90afc2, #4c768f);
+    //background-image: linear-gradient(to bottom, #90afc2, #4c768f);
+    -webkit-border-radius: 5;
+    -moz-border-radius: 5;
+    border-radius: 5px;
     text-shadow: 1px 1px 3px #666666;
     font-family: Arial;
     color: #ffffff;
-    font-size: 14px;
-    padding: 10px;
+    font-size: 12px;
+    padding: 5px;
     border: solid #446980 0px;
     text-decoration: none;
+    width:100px;
 }
 
 .regButton:hover{
@@ -674,7 +675,7 @@ th{
 .firstpagemargin{
 	margin-right:70px;
 	margin-left:40px;
-	margin-top:40px;
+	margin-top:-130px;
 	font-color:#000000;
 }
 
@@ -701,3 +702,4 @@ th{
 a {
 	word-break:break-all;
 }
+
