@@ -1,0 +1,32 @@
+---------------------------------------------------------------------------
+dikb-ddis-from-mp (processed-dikb-ddis.tsv)
+---------------------------------------------------------------------------
+asrt	claim	evidence	mp_evidence	researchStatementLabel	assertType	objectURI	preciptURI	label	homepage	source	dateAnnotated	whoAnnotated	evidenceVal	evidenceRole	object	precip	numericVal	contVal	evidenceSource	evidenceType	evidenceStatement	objectDose	precipDose	numOfSubjects
+---------------------------------------------------------------------------
+domeo-export-annotation (domeo-katrina-pkddi-11202015.csv)
+---------------------------------------------------------------------------
+source	date	assertionType	evidenceType	exactText	modality	statementType	drug1Lab	drug1Type	drug1Role	dose1	drug2Lab	drug2Type	drug2Role	dose2	objectRegimens	objectFormulation	objectDuration	preciptRegimens	preciptFormulation	preciptDuration	numOfParticipants	auc	aucType	aucDirection	cl	clType	clDirection	cmax	cmaxType	cmaxDirection	t12	t12Type	t12Direction
+---------------------------------------------------------------------------
+modifications for merge
+---------------------------------------------------------------------------
+modify annotation header to ddis's
+
+(1) changes been made:
+source -> evidenceSource
+date -> dateAnnotated
+evidenceType -> evidenceRole
+exactText -> evidenceStatement
+numOfParticipants - > numOfSubjects
+
+(2) add to the script that parse time format
+
+based on drug1Role/drug2Role
+
+drug1Lab -> object/precipt
+drug2Lab -> object/precipt
+
+dose1 -> objectDose/precipDose
+dose2 -> objectDose/precipDose
+
+(3) whoAnnotated: katrina
+

@@ -322,17 +322,20 @@
       <version>${flyway.version}</version>
     </dependency>
     <dependency>
-	<groupId>org.apache.httpcomponents</groupId>
-	<artifactId>httpclient</artifactId>
-	<version>4.3.6</version>
-</dependency>
-<dependency>
-	<groupId>commons-httpclient</groupId>
-	<artifactId>commons-httpclient</artifactId>
-	<version>3.1</version>
-</dependency>
-
-    
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.3.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-httpclient</groupId>
+      <artifactId>commons-httpclient</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>5.1.6</version>
+	</dependency>
     <dependency>
       <groupId>org.springframework.batch</groupId>
       <artifactId>spring-batch-admin-manager</artifactId>
