@@ -1,4 +1,5 @@
 WebAPIConfig/
+tests/
 
 *application.properties
 .idea/
