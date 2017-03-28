@@ -1,11 +1,10 @@
 compile:
-	mvn clean
-	mvn compile -Pwebapi-postgresql-dikb
+	mvn clean package -s WebAPIConfig/settings.xml -P webapi-postgresql-dikb
 
 package: compile
-	mvn package -Pwebapi-postgresql-dikb
+	mvn package -s WebAPIConfig/settings.xml -P webapi-postgresql-dikb
 
-deploy: package
+deploy: compile
 	#sudo service tomcat7 shutdown -- restore once the default ubuntu tomcat7 is re-installed (with proper port conf)
 	sudo /var/lib/tomcat7-DIKB/bin/shutdown.sh 
 	sleep 4
@@ -19,6 +18,8 @@ deploy: package
 git-push:
 	git push myfork master
 
-test:
-	wget -O tests/source.json "http://localhost:8090/WebAPI/source/sources" # -- change the port if using a differently configured tomcat
+test: 	# change the port if using a differently configured tomcat	
+	wget -O tests/source.json "http://localhost:8090/WebAPI/source/sources"
+	wget -O tests/assertion.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/assertion/1"
+
 

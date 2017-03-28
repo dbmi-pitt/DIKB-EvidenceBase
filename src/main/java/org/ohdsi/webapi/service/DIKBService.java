@@ -6,12 +6,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.ohdsi.webapi.source.Source;
 
 // import org.ohdsi.webapi.DIKB.DetailsDBModel;
 // import org.ohdsi.webapi.DIKB.DrugDBModel;
@@ -22,38 +24,31 @@ import org.ohdsi.webapi.DIKB.EvidenceDBModel;
 // import org.ohdsi.webapi.DIKB.SourceDBModel;
 // import org.ohdsi.webapi.DIKB.TimeDBModel;
 import org.ohdsi.webapi.helper.ResourceHelper;
-import org.ohdsi.webapi.source.JdbcUtil;
 import org.springframework.stereotype.Component;
 
 @Path("DIKB/")
 @Component
-public class DIKBService {
+public class DIKBService  extends AbstractDaoService {
 	
 	@GET
-	@Path("all")
+	@Path("{sourceKey}/assertion/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<EvidenceDBModel> getAllEvidence() throws Exception {
-		
+	public Collection<EvidenceDBModel> getAllEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("id") final Long id) throws Exception {
+	    Source source = getSourceRepository().findBySourceKey(sourceKey);
 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
-		Connection connection = JdbcUtil.getConnection();
-		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement.executeQuery(sql_statement);
-		List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
-		
-		while(resultSet.next())
-		{
- 	    
-			EvidenceDBModel evidence = new EvidenceDBModel();
-			evidence.researchStatementLabel = resultSet.getString("researchStatementLabel");
-			evidence.assertType = resultSet.getString("assertType");
-			evidence.dateAnnotated = resultSet.getString("dateAnnotated");
-			evidence.evidenceRole = resultSet.getString("evidenceRole");
-			evidence.evidence = resultSet.getString("evidence");
-			evidenceList.add(evidence);
- 	    
-		}
-		connection.close();
-		return evidenceList;	  
+	    List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
+	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	    
+	    for (Map rs: rows) {
+		EvidenceDBModel evidence = new EvidenceDBModel();
+		evidence.researchStatementLabel = (String) rs.get("researchStatementLabel");
+		evidence.assertType = (String) rs.get("assertType");
+		evidence.dateAnnotated = (String) rs.get("dateAnnotated");
+		evidence.evidenceRole = (String) rs.get("evidenceRole");
+		evidence.evidence = (String) rs.get("evidence");
+		evidenceList.add(evidence);
+	    }
+	    return evidenceList;
 	}
 	
 	// @GET
