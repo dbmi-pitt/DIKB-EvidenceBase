@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.ohdsi.webapi.source.Source;
 
 // import org.ohdsi.webapi.DIKB.DetailsDBModel;
-// import org.ohdsi.webapi.DIKB.DrugDBModel;
+import org.ohdsi.webapi.DIKB.DrugDBModel;
 import org.ohdsi.webapi.DIKB.EvidenceDBModel;
 // import org.ohdsi.webapi.DIKB.EvidenceDetailsDBModel;
 // import org.ohdsi.webapi.DIKB.InfoDBModel;
@@ -31,9 +31,9 @@ import org.springframework.stereotype.Component;
 public class DIKBService  extends AbstractDaoService {
 	
 	@GET
-	@Path("{sourceKey}/assertion/{id}")
+	@Path("{sourceKey}/assertion")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<EvidenceDBModel> getAllEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("id") final Long id) throws Exception {
+	public Collection<EvidenceDBModel> getAllEvidence(@PathParam("sourceKey") String sourceKey) throws Exception {
 	    Source source = getSourceRepository().findBySourceKey(sourceKey);
 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
 	    List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
@@ -51,74 +51,58 @@ public class DIKBService  extends AbstractDaoService {
 	    return evidenceList;
 	}
 	
-	// @GET
-	// @Path("drug")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<DrugDBModel> getAllDrug() throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
-	// 	List<String> filter = new ArrayList<String>();
-	// 	String tempdrug;
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		tempdrug = resultSet.getString("researchStatementLabel");
-			
-			
-	// 		if(!filter.contains((tempdrug.split("_"))[0]))
-	// 		{
-	// 			DrugDBModel item = new DrugDBModel();
-	// 			item.drugName = (tempdrug.split("_"))[0];
-	// 			drugList.add(item);
-	// 			filter.add((tempdrug.split("_"))[0]);
-	// 		}
-	// 	}
-	// 	connection.close();
-	// 	return drugList;	  
-	// }
+	@GET
+	@Path("{sourceKey}/drug")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<DrugDBModel> getAllDrug(@PathParam("sourceKey") String sourceKey) throws Exception {
+	    Source source = getSourceRepository().findBySourceKey(sourceKey);
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
+	    List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();	    
+	    List<String> filter = new ArrayList<String>();
+	    String tempdrug;
+
+	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	    for (Map rs: rows) {
+	    	tempdrug = (String) rs.get("researchStatementLabel");
+	    	if(!filter.contains((tempdrug.split("_"))[0])) {
+	    	    DrugDBModel item = new DrugDBModel();
+	    	    item.drugName = (tempdrug.split("_"))[0];
+	    	    drugList.add(item);
+	    	    filter.add((tempdrug.split("_"))[0]);
+	    	}
+	    }
+	    return drugList;	  
+	}
 	
-	// @GET
-	// @Path("precipitant/{object}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<DrugDBModel> getPrecipitant(@PathParam("object") final String object) throws Exception {
+	@GET
+	@Path("{sourceKey}/precipitant/{object}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Collection<DrugDBModel> getPrecipitant(@PathParam("sourceKey") String sourceKey, @PathParam("object") final String object) throws Exception {
+	    Source source = getSourceRepository().findBySourceKey(sourceKey);
+	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getPrecipitant.sql");
+	    sql_statement = sql_statement.replaceAll("example", object);
+	    
+	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	    List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
+	    List<String> filter = new ArrayList<String>();
+	    String tempdrug;
+	    String tempfilter = "";
+
+	    for (Map rs: rows) { 	   
+		tempdrug = (String) rs.get("researchStatementLabel");
+		DrugDBModel item = new DrugDBModel();
+		String[] temp = tempdrug.split("_");
+		int length = temp.length;
 		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getPrecipitant.sql");
-	//     sql_statement = sql_statement.replaceAll("example", object);
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
-	// 	List<String> filter = new ArrayList<String>();
-	// 	String tempdrug;
-	// 	String tempfilter = "";
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		tempdrug = resultSet.getString("researchStatementLabel");
-	// 		DrugDBModel item = new DrugDBModel();
-	// 		String[] temp = tempdrug.split("_");
-	// 		int length = temp.length;
-			
-	// 		if(!filter.contains((tempdrug.split("_"))[length-1]))
-	// 		{
-				
-	// 			tempfilter = (tempdrug.split("_"))[length-1];
-	// 			item.drugName = (tempdrug.split("_"))[length-1];
-	// 			drugList.add(item);
-	// 			filter.add(tempfilter);
-	// 		}
-			
-	// 	}
-	// 	connection.close();
-	// 	return drugList;	  
-	// }
-	
+		if(!filter.contains((tempdrug.split("_"))[length-1])) {			
+			tempfilter = (tempdrug.split("_"))[length-1];
+			item.drugName = (tempdrug.split("_"))[length-1];
+			drugList.add(item);
+			filter.add(tempfilter);
+		    }			
+	    }
+	    return drugList;	  
+	}	
 	
 	
 	// @GET

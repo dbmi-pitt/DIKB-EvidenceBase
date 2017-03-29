@@ -20,6 +20,8 @@ git-push:
 
 test: 	# change the port if using a differently configured tomcat	
 	wget -O tests/source.json "http://localhost:8090/WebAPI/source/sources"
-	wget -O tests/assertion.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/assertion/1"
+	wget -O tests/assertion.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/assertion"
+	wget -O tests/drug.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/drug"
+	wget -O tests/precipitant-ketoconnazole.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/precipitant/ketoconazole"
 
 
