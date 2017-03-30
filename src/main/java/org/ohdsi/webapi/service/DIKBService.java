@@ -15,14 +15,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.ohdsi.webapi.source.Source;
 
-// import org.ohdsi.webapi.DIKB.DetailsDBModel;
+import org.ohdsi.webapi.DIKB.DetailsDBModel;
 import org.ohdsi.webapi.DIKB.DrugDBModel;
 import org.ohdsi.webapi.DIKB.EvidenceDBModel;
-// import org.ohdsi.webapi.DIKB.EvidenceDetailsDBModel;
-// import org.ohdsi.webapi.DIKB.InfoDBModel;
-// import org.ohdsi.webapi.DIKB.OverviewDBModel;
-// import org.ohdsi.webapi.DIKB.SourceDBModel;
-// import org.ohdsi.webapi.DIKB.TimeDBModel;
+import org.ohdsi.webapi.DIKB.EvidenceDetailsDBModel;
+import org.ohdsi.webapi.DIKB.InfoDBModel;
+import org.ohdsi.webapi.DIKB.OverviewDBModel;
+import org.ohdsi.webapi.DIKB.SourceDBModel;
+import org.ohdsi.webapi.DIKB.TimeDBModel;
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
 
@@ -75,12 +75,12 @@ public class DIKBService  extends AbstractDaoService {
 	}
 	
 	@GET
-	@Path("{sourceKey}/precipitant/{object}")
+	@Path("{sourceKey}/subject/{drugname}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<DrugDBModel> getPrecipitant(@PathParam("sourceKey") String sourceKey, @PathParam("object") final String object) throws Exception {
+	public Collection<DrugDBModel> getPrecipitant(@PathParam("sourceKey") String sourceKey, @PathParam("drugname") final String drugname) throws Exception {
 	    Source source = getSourceRepository().findBySourceKey(sourceKey);
 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getPrecipitant.sql");
-	    sql_statement = sql_statement.replaceAll("example", object);
+	    sql_statement = sql_statement.replaceAll("example", drugname);
 	    
 	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	    List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
@@ -105,169 +105,157 @@ public class DIKBService  extends AbstractDaoService {
 	}	
 	
 	
-	// @GET
-	// @Path("recent/{num}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<EvidenceDBModel> getRecentEvidence(@PathParam("num") final String num) throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
-	//     sql_statement += " LIMIT " + num + ";";
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
-	// 	String tempSourceType;
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		EvidenceDBModel evidence = new EvidenceDBModel();
-	// 		tempSourceType = resultSet.getString("evidenceType");
-	// 		if(tempSourceType.length() == 0)
-	// 		{
-	// 			evidence.name = "Other";
-	// 			evidence.fullname = "Other";
-	// 		}else{
-	// 			evidence.name= resultSet.getString("tag");
-	// 			evidence.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
-	// 		}
-	// 		evidence.researchStatementLabel = resultSet.getString("researchStatementLabel").replaceAll("_", " ");
-	// 		evidence.assertType = resultSet.getString("assertType");
-	// 		String dateAnnotated = resultSet.getString("dateAnnotated");
-	// 		dateAnnotated = dateAnnotated.replaceAll("-", "");
-	// 		dateAnnotated = dateAnnotated.replaceAll(":", "");
-	// 		dateAnnotated = dateAnnotated.replaceAll(" ", "");
-	// 		dateAnnotated = dateAnnotated.replaceAll("/", "");
-	// 		dateAnnotated = dateAnnotated.substring(2);
-	// 		dateAnnotated = dateAnnotated.substring(3, dateAnnotated.length()-3);
-	// 		dateAnnotated += "000";
-	// 		String tempDate = resultSet.getString("dateAnnotated");
-	// 		evidence.dateAnnotated = tempDate.substring(0, tempDate.length()-1);
-	// 		evidence.evidenceRole = resultSet.getString("evidenceRole");
-	// 		evidence.evidence = resultSet.getString("evidence");
-	// 		evidence.name = resultSet.getString("tag");
-	// 		evidence.label = resultSet.getString("tag");
-	// 		evidence.object = resultSet.getString("researchStatementLabel").split("_")[0];
-	// 		evidence.value = 1;
-	// 		ArrayList<TimeDBModel> timeList = new ArrayList<TimeDBModel>();
-			
-	// 		TimeDBModel timemodel = new TimeDBModel();
-	// 		timemodel.setTimeDBModel(dateAnnotated, dateAnnotated);
-	// 		timeList.add(timemodel);
-	// 		evidence.times = timeList;
-	// 		evidenceList.add(evidence);
- 	    
-	// 	}
-	// 	connection.close();
-	// 	return evidenceList;	  
-	// }
+    @GET
+    @Path("{sourceKey}/recent/{num}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<EvidenceDBModel> getRecentEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("num") final String num) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
+	sql_statement += " LIMIT " + num + ";";
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
+	String tempSourceType;
 	
-	// @GET
-	// @Path("search/{label}/{precipitant}/{source}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<DetailsDBModel> searchEvidence(@PathParam("label") final String label,@PathParam("precipitant") final String precipitant, @PathParam("source") final String source) throws Exception {
-		
-	// 	//String source = label.split("+")[1];
-	// 	//String drugname = label.split("%2B")[0];
-	//     String sql_statement;
-	//     if(source.equalsIgnoreCase("Other"))
-	//     {
-	//     	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	//     	sql_statement += " '" + label + "_%' and researchStatementLabel LIKE '%_" + precipitant + "' and evidenceType='' order by assertType, researchStatementLabel;";
-	//     }else{
-	//     	sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	//     	sql_statement += " '" + label + "_%' and researchStatementLabel LIKE '%_" + precipitant + "' and evidenceType like '%" + source + "%' order by assertType, researchStatementLabel;";
-	//     }
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<DetailsDBModel> evidenceList = new ArrayList<DetailsDBModel>();
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		DetailsDBModel evidence = new DetailsDBModel();
-	// 		String assertType = resultSet.getString("assertType");
-	// 		evidence.Object = label;
-	// 		evidence.assertType = assertType;
-	// 		evidence.Precipitant = resultSet.getString("researchStatementLabel").replaceAll(assertType, "").split("__")[1];
-	// 		evidence.evidenceRole = resultSet.getString("evidenceRole");
-	// 		evidence.evidence = resultSet.getString("evidence").replaceAll("https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/", "");
-	// 		evidence.evidenceSource = resultSet.getString("evidenceSource");
-	// 		evidence.evidenceType = resultSet.getString("evidenceType");
-	// 		evidence.evidenceStatement = resultSet.getString("evidenceStatement");
-	// 		evidenceList.add(evidence);
- 	    
-	// 	}
-	// 	connection.close();
-	// 	return evidenceList;	  
-	// }
+	for (Map rs: rows) { 	    	    
+	    EvidenceDBModel evidence = new EvidenceDBModel();
+	    tempSourceType = (String) rs.get("evidenceType");
+	    if(tempSourceType.length() == 0) {
+		evidence.name = "Other";
+		evidence.fullname = "Other";
+	    }else{
+		evidence.name= (String) rs.get("tag");
+		evidence.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
+	    }
+	    evidence.researchStatementLabel = ((String) rs.get("researchStatementLabel")).replaceAll("_", " ");
+	    evidence.assertType = (String) rs.get("assertType");
+	    String dateAnnotated = (String) rs.get("dateAnnotated");
+	    dateAnnotated = dateAnnotated.replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "").replaceAll("/", "");
+	    dateAnnotated = dateAnnotated.substring(2);
+	    dateAnnotated = dateAnnotated.substring(3, dateAnnotated.length()-3);
+	    dateAnnotated += "000";
+	    String tempDate = (String) rs.get("dateAnnotated");
+	    evidence.dateAnnotated = tempDate.substring(0, tempDate.length()-1);
+	    evidence.evidenceRole = (String) rs.get("evidenceRole");
+	    evidence.evidence = (String) rs.get("evidence");
+	    evidence.name = (String) rs.get("tag");
+	    evidence.label = (String) rs.get("tag");
+	    evidence.object = ((String) rs.get("researchStatementLabel")).split("_")[0];
+	    evidence.value = 1;
+	    
+	    ArrayList<TimeDBModel> timeList = new ArrayList<TimeDBModel>();		
+	    TimeDBModel timemodel = new TimeDBModel();
+	    timemodel.setTimeDBModel(dateAnnotated, dateAnnotated);
+	    timeList.add(timemodel);
+	    evidence.times = timeList;
+	    evidenceList.add(evidence); 	    
+	    }	 
+	return evidenceList;	  
+    }
+
+    /**
+     * @param assertion label
+     * @param precipitant drug name
+     * @param evidence source
+     * @return
+     */
+    @GET
+    @Path("{sourceKey}/search/{label}/{precipitant}/{evSource}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<DetailsDBModel> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("label") final String label, @PathParam("precipitant") final String precipitant, @PathParam("evSource") final String evSource) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
 	
-	// @GET
-	// @Path("source/{drug}/{precipitant}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<SourceDBModel> getSourceType(@PathParam("drug") final String drug, @PathParam("precipitant") final String precipitant) throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getSourceType.sql");
-	//     sql_statement = sql_statement.replaceAll("example1", drug);
-	//     sql_statement = sql_statement.replaceAll("example2", precipitant);
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<SourceDBModel> itemList = new ArrayList<SourceDBModel>();
-	// 	String tempSourceType;
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		SourceDBModel item = new SourceDBModel();
-	// 		tempSourceType = resultSet.getString("evidenceType");
-	// 		if(tempSourceType.length() == 0)
-	// 		{
-	// 			item.sourceType = "Other";
-	// 			item.fullname = "Other";
-	// 		}else{
-	// 			item.sourceType = resultSet.getString("tag");
-	// 			item.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
-	// 		}
-	// 		item.sourceNum = resultSet.getInt("num");
-	// 		itemList.add(item);
- 	    
-	// 	}
-	// 	/*SourceDBModel item1 = new SourceDBModel();
-	// 	item1.sourceType = "EV_EX_Trans_Prot_ID";
-	// 	item1.fullname = "EV_EX_Trans_Prot_ID";
-	// 	item1.sourceNum = 2;
-	// 	itemList.add(item1);*/
-	// 	connection.close();
-	// 	return itemList;	  
-	// }
+	// query by label, precipitant and evidenceType if source type not "other"
+	if(evSource.equalsIgnoreCase("other")) { 
+	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + precipitant + "%_' and evidencesource='' order by assertType, researchStatementLabel;";
+	} else {
+	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + precipitant + "%_' and evidencesource like '%" + evSource + "%' order by assertType, researchStatementLabel;";
+	}
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	List<DetailsDBModel> evidenceList = new ArrayList<DetailsDBModel>();
 	
-	// @GET
-	// @Path("info/{drug}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<InfoDBModel> getDrugInfo(@PathParam("drug") final String drug) throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
-	//     sql_statement += " '%" + drug + "%';";
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
-	// 	List<InfoDBModel> infoList = new ArrayList<InfoDBModel>();
-		
-	// 	while(resultSet.next())
-	// 	{
- 	    
-	// 		InfoDBModel item = new InfoDBModel();
-	// 		String tempLabel = resultSet.getString("researchStatementLabel");
-	// 		String predicate = tempLabel.split("_")[1];
-	// 		item.predicate = predicate;
-	// 		item.precipitant.add(tempLabel.split("_")[2]);
- 	    
-	// 	}
-	// 	connection.close();
-	// 	return infoList;	  
-	// }
+	for (Map rs: rows) { 	    	    		    
+	    DetailsDBModel evidence = new DetailsDBModel();
+	    String assertType = (String) rs.get("assertType");
+	    evidence.Object = (String) rs.get("object");
+	    evidence.assertType = assertType;
+	    evidence.Precipitant = (String) rs.get("precip");
+	    evidence.evidenceRole = (String) rs.get("evidenceRole");
+	    evidence.evidence = ((String) rs.get("evidence")).replaceAll("https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/", "");
+	    evidence.evidenceSource = (String) rs.get("evidenceSource");
+	    evidence.evidenceType = (String) rs.get("evidenceType");
+	    evidence.evidenceStatement = (String) rs.get("evidenceStatement");
+	    evidenceList.add(evidence); 	    
+	}
+	return evidenceList;	  
+    }
+    
+    
+    /**
+     * Qurey evidence type by two drug names
+     * @param drugname
+     * @param precipitant drug name
+     * @return
+     */
+    @GET
+    @Path("{sourceKey}/evidencetype/{drug}/{precipitant}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<SourceDBModel> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drug") final String drug, @PathParam("precipitant") final String precipitant) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getEvidenceType.sql");
+	sql_statement = sql_statement.replaceAll("example1", drug).replaceAll("example2", precipitant);
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	
+	List<SourceDBModel> itemList = new ArrayList<SourceDBModel>();
+	String tempSourceType;
+	
+	for (Map rs: rows) { 	    	    	 	    
+	    SourceDBModel item = new SourceDBModel();
+	    tempSourceType = (String) rs.get("evidenceType");
+	    if(tempSourceType.length() == 0) {
+		item.sourceType = "Other";
+		item.fullname = "Other";
+	    } else {
+		item.sourceType = (String) rs.get("tag");
+		item.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/DIKB_evidence_ontology_v1.3.owl#", "");
+	    }
+	    item.sourceNum = (Long) rs.get("num");
+	    itemList.add(item); 	    
+	}
+	return itemList;	  
+    }
+
+    /**
+     * Qurey drug information by name
+     * @param drugname
+     * @return
+     */
+    @GET
+    @Path("{sourceKey}/drugInfo/{drug}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<InfoDBModel> getDrugInfo(@PathParam("sourceKey") String sourceKey, @PathParam("drug") final String drug) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+        String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
+        sql_statement += " '%" + drug + "%';";
+	
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	       
+	List<InfoDBModel> infoList = new ArrayList<InfoDBModel>();
+
+	for (Map rs: rows) {	    
+	    InfoDBModel item = new InfoDBModel();
+	    String tempLabel = (String) rs.get("researchStatementLabel");
+	    String [] labelList = tempLabel.split("_");
+
+	    String precipitant = labelList[0];
+	    item.predicate = (String) rs.get("asserttype");
+	    
+	    if (item.precipitantL == null) { // TODO: filter out duplications in qry results
+		item.precipitantL = new ArrayList<String>();
+	    }
+	    item.precipitantL.add(precipitant);
+	    infoList.add(item);
+	}       
+	return infoList;	  
+    }
 	
 	// @GET
 	// @Path("overview")
@@ -278,18 +266,18 @@ public class DIKBService  extends AbstractDaoService {
 	//     sql_statement += " LIMIT 10 ;";
 	//     Connection connection = JdbcUtil.getConnection();
 	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
+	// 	ResultSet rs = statement.executeQuery(sql_statement);
 	// 	List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
 	// 	String researchStatementLabel = null;
 	// 	int countNum = 0;
 		
-	// 	while(resultSet.next())
+	// 	while(rs.next())
 	// 	{
-	// 		researchStatementLabel = resultSet.getString(researchStatementLabel);//.split("_")[0];
+	// 		researchStatementLabel = rs.get(researchStatementLabel);//.split("_")[0];
 	// 		OverviewDBModel overview = new OverviewDBModel();
 	// 		overview.OverviewDrug = researchStatementLabel;
 	// 		overview.OverviewTag = "Drugs with the most recent evidences";
-	// 		overview.OverviewAttribute = resultSet.getString("dateAnnotated");
+	// 		overview.OverviewAttribute = rs.get("dateAnnotated");
 	// 		overviewList.add(overview);
 	// 		//overviewList.get(0).OverviewDrug
 	// 		//++countNum;
@@ -308,18 +296,18 @@ public class DIKBService  extends AbstractDaoService {
 	//     sql_statement += " LIMIT 10 ;";
 	//     Connection connection = JdbcUtil.getConnection();
 	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
+	// 	ResultSet rs = statement.executeQuery(sql_statement);
 	// 	List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
 	// 	String researchStatementLabel = null;
 	// 	int countNum = 0;
 		
-	// 	while(resultSet.next())
+	// 	while(rs.next())
 	// 	{
-	// 		researchStatementLabel = resultSet.getString(researchStatementLabel);//.split("_")[0];
+	// 		researchStatementLabel = rs.get(researchStatementLabel);//.split("_")[0];
 	// 		OverviewDBModel overview = new OverviewDBModel();
 	// 		overview.OverviewDrug = researchStatementLabel;
 	// 		overview.OverviewTag = "Drugs with the most recent evidences";
-	// 		overview.OverviewAttribute = resultSet.getString("dateAnnotated");
+	// 		overview.OverviewAttribute = rs.get("dateAnnotated");
 	// 		overviewList.add(overview);
 	// 		//overviewList.get(0).OverviewDrug
 	// 		//++countNum;
@@ -338,26 +326,26 @@ public class DIKBService  extends AbstractDaoService {
 	//     sql_statement += "'https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/" + evidenceID + "';";
 	// 	Connection connection = JdbcUtil.getConnection();
 	// 	Statement statement = connection.createStatement();
-	// 	ResultSet resultSet = statement.executeQuery(sql_statement);
+	// 	ResultSet rs = statement.executeQuery(sql_statement);
 	// 	List<EvidenceDetailsDBModel> detailsList = new ArrayList<EvidenceDetailsDBModel>();
 		
-	// 	while(resultSet.next())
+	// 	while(rs.next())
 	// 	{
  	    
 	// 		EvidenceDetailsDBModel item = new EvidenceDetailsDBModel();
-	// 		item.evidenceStatement = resultSet.getString("evidenceStatement");
-	// 		item.label = resultSet.getString("label");
-	// 		item.asrt = resultSet.getString("asrt");
-	// 		item.dateAnnotated = resultSet.getString("dateAnnotated");
-	// 		item.whoAnnotated = resultSet.getString("whoAnnotated");
-	// 		item.evidence = resultSet.getString("evidence");
-	// 		item.evidenceRole = resultSet.getString("evidenceRole");
-	// 		item.evidenceSource = resultSet.getString("evidenceSource");
-	// 		item.numOfSubjects = resultSet.getInt("numOfSubjects");
-	// 		item.objectDose = resultSet.getInt("objectDose");
-	// 		item.precipDose = resultSet.getInt("precipDose");
-	// 		item.evidenceVal = resultSet.getString("evidenceVal");
-	// 		item.tag = resultSet.getString("tag");
+	// 		item.evidenceStatement = rs.get("evidenceStatement");
+	// 		item.label = rs.get("label");
+	// 		item.asrt = rs.get("asrt");
+	// 		item.dateAnnotated = rs.get("dateAnnotated");
+	// 		item.whoAnnotated = rs.get("whoAnnotated");
+	// 		item.evidence = rs.get("evidence");
+	// 		item.evidenceRole = rs.get("evidenceRole");
+	// 		item.evidenceSource = rs.get("evidenceSource");
+	// 		item.numOfSubjects = rs.getInt("numOfSubjects");
+	// 		item.objectDose = rs.getInt("objectDose");
+	// 		item.precipDose = rs.getInt("precipDose");
+	// 		item.evidenceVal = rs.get("evidenceVal");
+	// 		item.tag = rs.get("tag");
 	// 		detailsList.add(item);
 	// 	}
 	// 	connection.close();

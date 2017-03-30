@@ -1,2 +1,1 @@
-SELECT * FROM DIKB WHERE researchStatementLabel LIKE 
-
+SELECT * FROM assertion1 WHERE researchStatementLabel LIKE 

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InfoDBModel {
 
-		  @JsonProperty("predicate")
-		  public String predicate;
-		  
-		  @JsonProperty("precipitant")
-		  public ArrayList<String> precipitant;
+    @JsonProperty("predicate")
+    public String predicate;
+    
+    @JsonProperty("precipitant")
+    public ArrayList<String> precipitantL;
 }
