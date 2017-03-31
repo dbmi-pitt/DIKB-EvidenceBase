@@ -75,7 +75,7 @@ public class DIKBService  extends AbstractDaoService {
 	}
 	
 	@GET
-	@Path("{sourceKey}/subject/{drugname}")
+	@Path("{sourceKey}/precipitant/{drugname}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<DrugDBModel> getPrecipitant(@PathParam("sourceKey") String sourceKey, @PathParam("drugname") final String drugname) throws Exception {
 	    Source source = getSourceRepository().findBySourceKey(sourceKey);
@@ -258,10 +258,10 @@ public class DIKBService  extends AbstractDaoService {
     }
 	
 	// @GET
-	// @Path("overview")
+	// @Path("{sourceKey}/overview")
 	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<OverviewDBModel> getOverview() throws Exception {
-		
+	// public Collection<OverviewDBModel> getOverview(@PathParam("sourceKey") String sourceKey) throws Exception {
+	//     Source source = getSourceRepository().findBySourceKey(sourceKey);
 	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
 	//     sql_statement += " LIMIT 10 ;";
 	//     Connection connection = JdbcUtil.getConnection();
