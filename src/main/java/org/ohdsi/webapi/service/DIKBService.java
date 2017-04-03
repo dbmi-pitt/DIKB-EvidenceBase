@@ -256,6 +256,42 @@ public class DIKBService  extends AbstractDaoService {
 	}       
 	return infoList;	  
     }
+
+    /**
+     * Qurey evidence details by evidenceId
+     * @param evidence Id
+     * @return
+     */
+    @GET
+    @Path("{sourceKey}/evidenceDetails/{evidenceID}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<EvidenceDetailsDBModel> getEvidenceDetails(@PathParam("sourceKey") String sourceKey, @PathParam("evidenceID") final String evidenceID) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getEvidenceDetails.sql");
+	sql_statement += "'https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/" + evidenceID + "';";
+
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	     
+	List<EvidenceDetailsDBModel> detailsList = new ArrayList<EvidenceDetailsDBModel>();
+
+	for (Map rs: rows) {	    
+	    EvidenceDetailsDBModel item = new EvidenceDetailsDBModel();
+	    item.evidenceStatement = (String) rs.get("evidenceStatement");
+	    item.label = (String) rs.get("label");
+	    item.asrt = (String) rs.get("researchstatementlabel");
+	    item.dateAnnotated = (String) rs.get("dateAnnotated");
+	    item.whoAnnotated = (String) rs.get("whoAnnotated");
+	    item.evidence = (String) rs.get("evidence");
+	    item.evidenceRole = (String) rs.get("evidenceRole");
+	    item.evidenceSource = (String) rs.get("evidenceSource");
+	    item.numOfSubjects = (Integer) rs.get("numOfSubjects");
+	    item.objectDose = (Double) rs.get("objectDose");
+	    item.precipDose = (Double) rs.get("precipDose");
+	    item.evidenceVal = (Double) rs.get("evidenceVal");
+	    item.tag = (String) rs.get("tag");
+	    detailsList.add(item);
+	}	
+	return detailsList;	  
+    }
 	
 	// @GET
 	// @Path("{sourceKey}/overview")
@@ -317,40 +353,7 @@ public class DIKBService  extends AbstractDaoService {
 	// 	return overviewList;	  
 	// }
 	
-	// @GET
-	// @Path("evidenceDetails/{evidenceID}")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<EvidenceDetailsDBModel> getEvidenceDetails(@PathParam("evidenceID") final String evidenceID) throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getEvidenceDetails.sql");
-	//     sql_statement += "'https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/" + evidenceID + "';";
-	// 	Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet rs = statement.executeQuery(sql_statement);
-	// 	List<EvidenceDetailsDBModel> detailsList = new ArrayList<EvidenceDetailsDBModel>();
-		
-	// 	while(rs.next())
-	// 	{
- 	    
-	// 		EvidenceDetailsDBModel item = new EvidenceDetailsDBModel();
-	// 		item.evidenceStatement = rs.get("evidenceStatement");
-	// 		item.label = rs.get("label");
-	// 		item.asrt = rs.get("asrt");
-	// 		item.dateAnnotated = rs.get("dateAnnotated");
-	// 		item.whoAnnotated = rs.get("whoAnnotated");
-	// 		item.evidence = rs.get("evidence");
-	// 		item.evidenceRole = rs.get("evidenceRole");
-	// 		item.evidenceSource = rs.get("evidenceSource");
-	// 		item.numOfSubjects = rs.getInt("numOfSubjects");
-	// 		item.objectDose = rs.getInt("objectDose");
-	// 		item.precipDose = rs.getInt("precipDose");
-	// 		item.evidenceVal = rs.get("evidenceVal");
-	// 		item.tag = rs.get("tag");
-	// 		detailsList.add(item);
-	// 	}
-	// 	connection.close();
-	// 	return detailsList;	  
-	// }
+
 	
 	
 }

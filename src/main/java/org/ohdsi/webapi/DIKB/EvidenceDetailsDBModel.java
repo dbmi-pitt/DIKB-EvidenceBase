@@ -25,10 +25,10 @@ public class EvidenceDetailsDBModel {
   public String evidenceStatement;
   
   @JsonProperty("objectDose")
-  public int objectDose;
+  public Double objectDose;
   
   @JsonProperty("precipDose")
-  public int precipDose;
+  public Double precipDose;
   
   @JsonProperty("evidenceSource")
   public String evidenceSource;
@@ -40,7 +40,7 @@ public class EvidenceDetailsDBModel {
   public int numOfSubjects;
   
   @JsonProperty("evidenceVal")
-  public String evidenceVal;
+  public Double evidenceVal;
   
   @JsonProperty("asrt")
   public String asrt;
