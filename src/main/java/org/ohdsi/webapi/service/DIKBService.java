@@ -159,17 +159,17 @@ public class DIKBService  extends AbstractDaoService {
      * @return
      */
     @GET
-    @Path("{sourceKey}/search/{label}/{precipitant}/{evSource}")
+    @Path("{sourceKey}/search/{label}/{drug}/{evType}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DetailsDBModel> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("label") final String label, @PathParam("precipitant") final String precipitant, @PathParam("evSource") final String evSource) throws Exception {
+    public Collection<DetailsDBModel> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("label") final String label, @PathParam("drug") final String drug, @PathParam("evType") final String evType) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/searchEvidenceByLabel.sql");
 	
-	// query by label, precipitant and evidenceType if source type not "other"
-	if(evSource.equalsIgnoreCase("other")) { 
-	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + precipitant + "%_' and evidencesource='' order by assertType, researchStatementLabel;";
+	// query by label, drug and evidenceType if source type not "other"
+	if(evType.equalsIgnoreCase("other")) { 
+	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + drug + "%' and evidencetype='' order by assertType, researchStatementLabel;";
 	} else {
-	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + precipitant + "%_' and evidencesource like '%" + evSource + "%' order by assertType, researchStatementLabel;";
+	    sql_statement += "'%" + label + "_%' and researchStatementLabel LIKE '%" + drug + "%' and evidencetype like '%" + evType + "%' order by assertType, researchStatementLabel;";
 	}
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DetailsDBModel> evidenceList = new ArrayList<DetailsDBModel>();
@@ -177,9 +177,9 @@ public class DIKBService  extends AbstractDaoService {
 	for (Map rs: rows) { 	    	    		    
 	    DetailsDBModel evidence = new DetailsDBModel();
 	    String assertType = (String) rs.get("assertType");
-	    evidence.Object = (String) rs.get("object");
-	    evidence.assertType = assertType;
-	    evidence.Precipitant = (String) rs.get("precip");
+	    evidence.Object = label;
+	    evidence.assertType = assertType;	    
+	    evidence.Precipitant = ((String) rs.get("researchStatementLabel")).replaceAll(assertType, "").split("__")[1];
 	    evidence.evidenceRole = (String) rs.get("evidenceRole");
 	    evidence.evidence = ((String) rs.get("evidence")).replaceAll("https://dbmi-icode-01.dbmi.pitt.edu/dikb/resource/Evidence/", "");
 	    evidence.evidenceSource = (String) rs.get("evidenceSource");
