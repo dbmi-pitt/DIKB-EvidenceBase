@@ -21,7 +21,7 @@ git-push:
 test: 	# change the port if using a differently configured tomcat	
 	wget -O tests/source.json "http://localhost:8090/WebAPI/source/sources"
 
-test-calls:
+test-dikb-calls:
 	wget -O tests/assertion.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/assertion"
 	wget -O tests/drug.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/drug"
 	wget -O tests/precipitant-ketoconnazole.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/precipitant/ketoconazole"
@@ -30,3 +30,5 @@ test-calls:
 	wget -O tests/evidence-type-by-drugname.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/evidencetype/escitalopram/aripiprazole"
 	wget -O tests/druginfo-by-name.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/drugInfo/clopidogrel"
 
+test-mp-calls:
+	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"

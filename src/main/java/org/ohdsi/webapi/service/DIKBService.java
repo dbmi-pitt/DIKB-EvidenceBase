@@ -26,30 +26,33 @@ import org.ohdsi.webapi.DIKB.TimeDBModel;
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
 
+import org.ohdsi.webapi.mpevidence.Claim;
+
 @Path("DIKB/")
 @Component
 public class DIKBService  extends AbstractDaoService {
 	
-	@GET
-	@Path("{sourceKey}/assertion")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<EvidenceDBModel> getAllEvidence(@PathParam("sourceKey") String sourceKey) throws Exception {
-	    Source source = getSourceRepository().findBySourceKey(sourceKey);
-	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
-	    List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
-	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-	    
-	    for (Map rs: rows) {
-		EvidenceDBModel evidence = new EvidenceDBModel();
-		evidence.researchStatementLabel = (String) rs.get("researchStatementLabel");
-		evidence.assertType = (String) rs.get("assertType");
-		evidence.dateAnnotated = (String) rs.get("dateAnnotated");
-		evidence.evidenceRole = (String) rs.get("evidenceRole");
-		evidence.evidence = (String) rs.get("evidence");
-		evidenceList.add(evidence);
-	    }
-	    return evidenceList;
+    @GET
+    @Path("{sourceKey}/assertion")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<EvidenceDBModel> getAllEvidence(@PathParam("sourceKey") String sourceKey) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getAllEvidence.sql");
+	
+	List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();	    
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	
+	for (Map rs: rows) {
+	    EvidenceDBModel evidence = new EvidenceDBModel();
+	    evidence.researchStatementLabel = (String) rs.get("researchStatementLabel");
+	    evidence.assertType = (String) rs.get("assertType");
+	    evidence.dateAnnotated = (String) rs.get("dateAnnotated");
+	    evidence.evidenceRole = (String) rs.get("evidenceRole");
+	    evidence.evidence = (String) rs.get("evidence");
+	    evidenceList.add(evidence);
 	}
+	return evidenceList;
+    }
 	
 	@GET
 	@Path("{sourceKey}/drug")
@@ -291,69 +294,7 @@ public class DIKBService  extends AbstractDaoService {
 	    detailsList.add(item);
 	}	
 	return detailsList;	  
-    }
-	
-	// @GET
-	// @Path("{sourceKey}/overview")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<OverviewDBModel> getOverview(@PathParam("sourceKey") String sourceKey) throws Exception {
-	//     Source source = getSourceRepository().findBySourceKey(sourceKey);
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
-	//     sql_statement += " LIMIT 10 ;";
-	//     Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet rs = statement.executeQuery(sql_statement);
-	// 	List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
-	// 	String researchStatementLabel = null;
-	// 	int countNum = 0;
-		
-	// 	while(rs.next())
-	// 	{
-	// 		researchStatementLabel = rs.get(researchStatementLabel);//.split("_")[0];
-	// 		OverviewDBModel overview = new OverviewDBModel();
-	// 		overview.OverviewDrug = researchStatementLabel;
-	// 		overview.OverviewTag = "Drugs with the most recent evidences";
-	// 		overview.OverviewAttribute = rs.get("dateAnnotated");
-	// 		overviewList.add(overview);
-	// 		//overviewList.get(0).OverviewDrug
-	// 		//++countNum;
- 	    
-	// 	}
-	// 	connection.close();
-	// 	return overviewList;	  
-	// }
-	
-	// @GET
-	// @Path("precipitantName")
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Collection<OverviewDBModel> getPrecipitantName() throws Exception {
-		
-	//     String sql_statement = ResourceHelper.GetResourceAsString("/resources/DIKB/sql/getRecentEvidence.sql");
-	//     sql_statement += " LIMIT 10 ;";
-	//     Connection connection = JdbcUtil.getConnection();
-	// 	Statement statement = connection.createStatement();
-	// 	ResultSet rs = statement.executeQuery(sql_statement);
-	// 	List<OverviewDBModel> overviewList = new ArrayList<OverviewDBModel>();
-	// 	String researchStatementLabel = null;
-	// 	int countNum = 0;
-		
-	// 	while(rs.next())
-	// 	{
-	// 		researchStatementLabel = rs.get(researchStatementLabel);//.split("_")[0];
-	// 		OverviewDBModel overview = new OverviewDBModel();
-	// 		overview.OverviewDrug = researchStatementLabel;
-	// 		overview.OverviewTag = "Drugs with the most recent evidences";
-	// 		overview.OverviewAttribute = rs.get("dateAnnotated");
-	// 		overviewList.add(overview);
-	// 		//overviewList.get(0).OverviewDrug
-	// 		//++countNum;
- 	    
-	// 	}
-	// 	connection.close();
-	// 	return overviewList;	  
-	// }
-	
-
+    }		
 	
 	
 }
