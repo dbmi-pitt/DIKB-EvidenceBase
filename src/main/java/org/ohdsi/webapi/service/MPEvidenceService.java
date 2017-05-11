@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import org.ohdsi.webapi.source.Source;
 
 import org.ohdsi.webapi.mpevidence.Claim;
+import org.ohdsi.webapi.mpevidence.DrugEntity;
 
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
@@ -49,58 +50,48 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
 
     	
-    // 	@GET
-    // 	@Path("{sourceKey}/drug")
-    // 	@Produces(MediaType.APPLICATION_JSON)
-    // 	public Collection<DrugDBModel> getAllDrug(@PathParam("sourceKey") String sourceKey) throws Exception {
-    // 	    Source source = getSourceRepository().findBySourceKey(sourceKey);
-    // 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllEvidence.sql");
-    // 	    List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();	    
-    // 	    List<String> filter = new ArrayList<String>();
-    // 	    String tempdrug;
+    @GET
+    @Path("{sourceKey}/objectdrugname")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<DrugEntity> getAllObjectDrugName(@PathParam("sourceKey") String sourceKey) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getObjectDrugNames.sql");
+	List<DrugEntity> drugList = new ArrayList<DrugEntity>();	    
+	List<String> filter = new ArrayList<String>();
 
-    // 	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-    // 	    for (Map rs: rows) {
-    // 	    	tempdrug = (String) rs.get("researchStatementLabel");
-    // 	    	if(!filter.contains((tempdrug.split("_"))[0])) {
-    // 	    	    DrugDBModel item = new DrugDBModel();
-    // 	    	    item.drugName = (tempdrug.split("_"))[0];
-    // 	    	    drugList.add(item);
-    // 	    	    filter.add((tempdrug.split("_"))[0]);
-    // 	    	}
-    // 	    }
-    // 	    return drugList;	  
-    // 	}
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	for (Map rs: rows) {
+	    DrugEntity item = new DrugEntity();
+	    item.drugName = (String) rs.get("qvalue");
+	    drugList.add(item);
+	    }
+	return drugList;	  
+    }
+
+
+    // get precipitant drug names based on specified object drug
+    @GET
+    @Path("{sourceKey}/precipitantdrugname/{objectname}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("objectname") final String objectname) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getPrecipitantDrugNames.sql");
+
+	System.out.println(sql_statement);
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
 	
-    // 	@GET
-    // 	@Path("{sourceKey}/precipitant/{drugname}")
-    // 	@Produces(MediaType.APPLICATION_JSON)
-    // 	public Collection<DrugDBModel> getPrecipitant(@PathParam("sourceKey") String sourceKey, @PathParam("drugname") final String drugname) throws Exception {
-    // 	    Source source = getSourceRepository().findBySourceKey(sourceKey);
-    // 	    String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getPrecipitant.sql");
-    // 	    sql_statement = sql_statement.replaceAll("example", drugname);
-	    
-    // 	    List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-    // 	    List<DrugDBModel> drugList = new ArrayList<DrugDBModel>();
-    // 	    List<String> filter = new ArrayList<String>();
-    // 	    String tempdrug;
-    // 	    String tempfilter = "";
-
-    // 	    for (Map rs: rows) { 	   
-    // 		tempdrug = (String) rs.get("researchStatementLabel");
-    // 		DrugDBModel item = new DrugDBModel();
-    // 		String[] temp = tempdrug.split("_");
-    // 		int length = temp.length;
-		
-    // 		if(!filter.contains((tempdrug.split("_"))[length-1])) {			
-    // 			tempfilter = (tempdrug.split("_"))[length-1];
-    // 			item.drugName = (tempdrug.split("_"))[length-1];
-    // 			drugList.add(item);
-    // 			filter.add(tempfilter);
-    // 		    }			
-    // 	    }
-    // 	    return drugList;	  
-    // 	}	
+	for (Map rs: rows) {
+	    String precipitant = (String) rs.get("precipitant_name");
+	    String object = (String) rs.get("object_name");
+	    if (object.equals(objectname)) {
+		DrugEntity item = new DrugEntity();
+		item.drugName = precipitant;
+		drugList.add(item);
+	    }
+	}
+	return drugList;	  
+    }	
 	
 	
     // @GET

@@ -32,3 +32,6 @@ test-dikb-calls:
 
 test-mp-calls:
 	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
+	wget -O tests/object-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/objectdrugname"
+	wget -O tests/ketoconazole-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/precipitantdrugname/ketoconazole"
+
