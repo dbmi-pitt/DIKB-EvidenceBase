@@ -17,6 +17,7 @@ import org.ohdsi.webapi.source.Source;
 
 import org.ohdsi.webapi.mpevidence.Claim;
 import org.ohdsi.webapi.mpevidence.DrugEntity;
+import org.ohdsi.webapi.mpevidence.Method;
 
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
@@ -91,56 +92,37 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    }
 	}
 	return drugList;	  
-    }	
-	
-	
-    // @GET
-    // @Path("{sourceKey}/recent/{num}")
-    // @Produces(MediaType.APPLICATION_JSON)
-    // public Collection<EvidenceDBModel> getRecentEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("num") final String num) throws Exception {
-    // 	Source source = getSourceRepository().findBySourceKey(sourceKey);
-    // 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getRecentEvidence.sql");
-    // 	sql_statement += " LIMIT " + num + ";";
-    // 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-    // 	List<EvidenceDBModel> evidenceList = new ArrayList<EvidenceDBModel>();
-    // 	String tempSourceType;
-	
-    // 	for (Map rs: rows) { 	    	    
-    // 	    EvidenceDBModel evidence = new EvidenceDBModel();
-    // 	    tempSourceType = (String) rs.get("evidenceType");
-    // 	    if(tempSourceType.length() == 0) {
-    // 		evidence.name = "Other";
-    // 		evidence.fullname = "Other";
-    // 	    }else{
-    // 		evidence.name= (String) rs.get("tag");
-    // 		evidence.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/mpevidence_evidence_ontology_v1.3.owl#", "");
-    // 	    }
-    // 	    evidence.researchStatementLabel = ((String) rs.get("researchStatementLabel")).replaceAll("_", " ");
-    // 	    evidence.assertType = (String) rs.get("assertType");
-    // 	    String dateAnnotated = (String) rs.get("dateAnnotated");
-    // 	    dateAnnotated = dateAnnotated.replaceAll("-", "").replaceAll(":", "").replaceAll(" ", "").replaceAll("/", "");
-    // 	    dateAnnotated = dateAnnotated.substring(2);
-    // 	    dateAnnotated = dateAnnotated.substring(3, dateAnnotated.length()-3);
-    // 	    dateAnnotated += "000";
-    // 	    String tempDate = (String) rs.get("dateAnnotated");
-    // 	    evidence.dateAnnotated = tempDate.substring(0, tempDate.length()-1);
-    // 	    evidence.evidenceRole = (String) rs.get("evidenceRole");
-    // 	    evidence.evidence = (String) rs.get("evidence");
-    // 	    evidence.name = (String) rs.get("tag");
-    // 	    evidence.label = (String) rs.get("tag");
-    // 	    evidence.object = ((String) rs.get("researchStatementLabel")).split("_")[0];
-    // 	    evidence.value = 1;
-	    
-    // 	    ArrayList<TimeDBModel> timeList = new ArrayList<TimeDBModel>();		
-    // 	    TimeDBModel timemodel = new TimeDBModel();
-    // 	    timemodel.setTimeDBModel(dateAnnotated, dateAnnotated);
-    // 	    timeList.add(timemodel);
-    // 	    evidence.times = timeList;
-    // 	    evidenceList.add(evidence); 	    
-    // 	    }	 
-    // 	return evidenceList;	  
-    // }
+    }
 
+
+    /**
+     * Get method by two drug names
+     * @param object drug name
+     * @param precipitant drug name
+     * @return
+     */
+    @GET
+    @Path("{sourceKey}/method/{objectname}/{precipitantname}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("objectname") final String objectname, @PathParam("precipitantname") final String precipitantname) throws Exception {
+    	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNames.sql");
+    	sql_statement = sql_statement.replaceAll("@object", objectname).replaceAll("@precipitant", precipitantname);
+	
+    	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	
+    	List<Method> methodList = new ArrayList<Method>();
+	
+    	for (Map rs: rows) { 	    	    	 	    
+    	    Method item = new Method();
+	    item.method = (String) rs.get("entered_value");
+	    item.inferredMethod = (String) rs.get("entered_value");
+    	    item.sourceNum = (Long) rs.get("cnts");
+    	    methodList.add(item); 	    
+    	}
+    	return methodList;	  
+    }
+
+    
     // /**
     //  * @param assertion label
     //  * @param precipitant drug name
@@ -178,40 +160,7 @@ public class MPEvidenceService  extends AbstractDaoService {
     // 	}
     // 	return evidenceList;	  
     // }
-    
-    
-    // /**
-    //  * Qurey evidence type by two drug names
-    //  * @param drugname
-    //  * @param precipitant drug name
-    //  * @return
-    //  */
-    // @GET
-    // @Path("{sourceKey}/evidencetype/{drug}/{precipitant}")
-    // @Produces(MediaType.APPLICATION_JSON)
-    // public Collection<SourceDBModel> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drug") final String drug, @PathParam("precipitant") final String precipitant) throws Exception {
-    // 	Source source = getSourceRepository().findBySourceKey(sourceKey);
-    // 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getEvidenceType.sql");
-    // 	sql_statement = sql_statement.replaceAll("example1", drug).replaceAll("example2", precipitant);
-    // 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	
-    // 	List<SourceDBModel> itemList = new ArrayList<SourceDBModel>();
-    // 	String tempSourceType;
 	
-    // 	for (Map rs: rows) { 	    	    	 	    
-    // 	    SourceDBModel item = new SourceDBModel();
-    // 	    tempSourceType = (String) rs.get("evidenceType");
-    // 	    if(tempSourceType.length() == 0) {
-    // 		item.sourceType = "Other";
-    // 		item.fullname = "Other";
-    // 	    } else {
-    // 		item.sourceType = (String) rs.get("tag");
-    // 		item.fullname = tempSourceType.replaceAll("http://dbmi-icode-01.dbmi.pitt.edu/dikb-evidence/mpevidence_evidence_ontology_v1.3.owl#", "");
-    // 	    }
-    // 	    item.sourceNum = (Long) rs.get("num");
-    // 	    itemList.add(item); 	    
-    // 	}
-    // 	return itemList;	  
-    // }
 
     // /**
     //  * Qurey drug information by name
