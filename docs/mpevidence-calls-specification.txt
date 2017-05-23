@@ -1,0 +1,47 @@
+(1) UC: 1st drug name auto completion
+Query: get all subject and object qualifier names
+Condition: None
+Result: qualifier name
+
+(2) UC: 2nd drug name auto completion
+Query: get all 2nd drug name options based on 1st specified drug
+Condition: 1st drug name
+Result: qualifier name
+
+(3) UC: List all claim, method information
+Query: get claim (subject, predicate, object), method (entered_method, inferred_method)
+Condition: 1st drugname, 2nd drugname (optional)
+Result: 1st drugname, 2nd drugname, relationship, method, inferred method
+
+(4) UC: List data and material as evidence for specified claim
+Condition: method, 1st drugname, 2nd drugname
+Query:
+
+4.1 When method is 'DDI clinical trial'
+get evidence relationship
+get number of participants
+get drug 1 dose (value, formulation, duration, regimens), drug 2 dose
+get data ratio: auc ratio (value, type, direction), cmax, clearance, halflife
+
+4.2 When method is 'Phenotype clinical study'
+get evidence relationship
+get phenotype information (type, typeVal, metabolizer, population)
+get number of participants
+get drug 1 dose (value, formulation, duration, regimens)
+get data ratio: auc ratio (value, type, direction), cmax, clearance, halflife
+
+4.3 When method is 'Case Report'
+get evidence relationship
+get drug 1 dose (value, formulation, duration, regimens), drug 2 dose
+get reviewer information (date, reviewer, total, lackInfo)
+get dips questions (q1, q2 - q10)
+
+4.4 When method is 'Experiments'
+get evidence relationship
+get cell system
+get metaboliteRateWith
+get metaboliteRateWithout
+get measurement: cl (value, unit), vmax, inhibition, km, ki, kinact, ic50
+
+4.5 When method is 'Statement'
+get negation
