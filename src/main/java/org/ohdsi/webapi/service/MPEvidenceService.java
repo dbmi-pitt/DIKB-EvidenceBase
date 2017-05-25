@@ -50,13 +50,14 @@ public class MPEvidenceService  extends AbstractDaoService {
 	return claimList;
     }
 
-    	
+
+    // get all drug names
     @GET
-    @Path("{sourceKey}/objectdrugname")
+    @Path("{sourceKey}/drugname")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllObjectDrugName(@PathParam("sourceKey") String sourceKey) throws Exception {
+    public Collection<DrugEntity> getAllDrugName(@PathParam("sourceKey") String sourceKey) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
-	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getObjectDrugNames.sql");
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllDrugNames.sql");
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();	    
 	List<String> filter = new ArrayList<String>();
 
@@ -70,26 +71,28 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
 
 
-    // get precipitant drug names based on specified object drug
+    // get 2nd drug names based on specified 1st drug
     @GET
-    @Path("{sourceKey}/precipitantdrugname/{objectname}")
+    @Path("{sourceKey}/drugname/{drugname}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("objectname") final String objectname) throws Exception {
+    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugname") final String drugname) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
-	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getPrecipitantDrugNames.sql");
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getSecondDrugName.sql");
+    	sql_statement = sql_statement.replaceAll("@drugname", drugname);
 
-	System.out.println(sql_statement);
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
 	
 	for (Map rs: rows) {
-	    String precipitant = (String) rs.get("precipitant_name");
-	    String object = (String) rs.get("object_name");
-	    if (object.equals(objectname)) {
-		DrugEntity item = new DrugEntity();
-		item.drugName = precipitant;
-		drugList.add(item);
+	    String subject = (String) rs.get("subject");
+	    String object = (String) rs.get("object");
+	    DrugEntity item = new DrugEntity();
+	    if (subject.equals(drugname)) {
+		item.drugName = object;
+	    } else {
+		item.drugName = subject;
 	    }
+	    drugList.add(item);
 	}
 	return drugList;	  
     }
@@ -102,22 +105,27 @@ public class MPEvidenceService  extends AbstractDaoService {
      * @return
      */
     @GET
-    @Path("{sourceKey}/method/{objectname}/{precipitantname}")
+    @Path("{sourceKey}/method/{drugname1}/{drugname2}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("objectname") final String objectname, @PathParam("precipitantname") final String precipitantname) throws Exception {
+    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNames.sql");
-    	sql_statement = sql_statement.replaceAll("@object", objectname).replaceAll("@precipitant", precipitantname);
+    	sql_statement = sql_statement.replaceAll("@drugname1", drugname1).replaceAll("@drugname2", drugname2);
+	System.out.println(sql_statement);
 	
-    	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);	
+    	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
     	List<Method> methodList = new ArrayList<Method>();
+	
+
 	
     	for (Map rs: rows) { 	    	    	 	    
     	    Method item = new Method();
 	    item.method = (String) rs.get("entered_value");
 	    item.inferredMethod = (String) rs.get("entered_value");
     	    item.sourceNum = (Long) rs.get("cnts");
-    	    methodList.add(item); 	    
+    	    methodList.add(item);
+
+	    System.out.println(item.method);
     	}
     	return methodList;	  
     }

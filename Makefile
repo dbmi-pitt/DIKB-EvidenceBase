@@ -31,8 +31,9 @@ test-dikb-calls:
 	wget -O tests/druginfo-by-name.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/drugInfo/clopidogrel"
 
 test-mp-calls:
-	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
-	wget -O tests/object-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/objectdrugname"
-	wget -O tests/ketoconazole-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/precipitantdrugname/ketoconazole"
+	wget -O tests/drugname.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname"
+	wget -O tests/second-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/ketoconazole"
 	wget -O tests/method-norverapamil-atorvastatin.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/norverapamil/atorvastatin"
+	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
+
 
