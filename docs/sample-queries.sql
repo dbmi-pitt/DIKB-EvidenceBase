@@ -1,3 +1,5 @@
+-- get claim by specified user entered method and two drug names
+
 WITH method AS (
 SELECT mp_claim_id, m.entered_value as method from ohdsi.method m),
 
@@ -27,6 +29,6 @@ from method
 JOIN s ON s.id = method.mp_claim_id
 JOIN o ON o.id = method.mp_claim_id
 JOIN p ON p.id = method.mp_claim_id
-WHERE method.method = '@method'
-AND (s.qvalue = '@drugname1' AND o.qvalue = '@drugname2')
-OR (s.qvalue = '@drugname2' AND o.qvalue = '@drugname1');
+WHERE method.method = 'DDI clinical trial'
+AND (s.qvalue = 'ketoconazole' AND o.qvalue = 'alitretinoin')
+OR (s.qvalue = 'alitretinoin' AND o.qvalue = 'ketoconazole');
