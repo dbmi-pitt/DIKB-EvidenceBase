@@ -43,7 +43,8 @@ public class MPEvidenceService  extends AbstractDaoService {
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	for (Map rs: rows) {
 	    DrugEntity item = new DrugEntity();
-	    item.drugName = (String) rs.get("qvalue");
+	    item.drugConceptName = (String) rs.get("concept_name");
+	    item.drugConceptCode = (String) rs.get("concept_code");
 	    drugList.add(item);
 	    }
 	return drugList;	  
@@ -52,24 +53,29 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     // get 2nd drug names based on specified 1st drug
     @GET
-    @Path("{sourceKey}/drugname/{drugname}")
+    @Path("{sourceKey}/drugname/{drugConceptName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugname") final String drugname) throws Exception {
+    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugConceptName") final String drugConceptName) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getSecondDrugName.sql");
-    	sql_statement = sql_statement.replaceAll("@drugname", drugname);
+    	sql_statement = sql_statement.replaceAll("@drugconceptname", drugConceptName);
 
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
 	
 	for (Map rs: rows) {
 	    String subject = (String) rs.get("subject");
+	    String subjectConceptCode = (String) rs.get("s_concept_code");
 	    String object = (String) rs.get("object");
+	    String objectConceptCode = (String) rs.get("o_concept_code");
+	    
 	    DrugEntity item = new DrugEntity();
-	    if (subject.equals(drugname)) {
-		item.drugName = object;
+	    if (subject.equals(drugConceptName)) {
+		item.drugConceptName = object;
+		item.drugConceptCode = objectConceptCode;
 	    } else {
-		item.drugName = subject;
+		item.drugConceptName = subject;
+		item.drugConceptCode = subjectConceptCode;
 	    }
 	    drugList.add(item);
 	}

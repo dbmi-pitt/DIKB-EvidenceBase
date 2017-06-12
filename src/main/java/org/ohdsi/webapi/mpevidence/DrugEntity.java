@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DrugEntity {
 
-    @JsonProperty("DRUG")
-    public String drugName;
+    @JsonProperty("CONCEPT_NAME")
+    public String drugConceptName;
+
+    @JsonProperty("CONCEPT_CODE")
+    public String drugConceptCode;
 		  
 }
