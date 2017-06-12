@@ -31,9 +31,8 @@ test-dikb-calls:
 	wget -O tests/druginfo-by-name.json "http://localhost:8090/WebAPI/DIKB/POSTGRES-DIKB/drugInfo/clopidogrel"
 
 test-mp-calls:
-	wget -O tests/drugname.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname"
-	wget -O tests/second-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/rivaroxaban"
-	wget -O tests/method-desipramine-paroxetine.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/Ketoconazole/Citalopram"
-	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
-	wget -O tests/claim-by-method-drugs-1.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/ketoconazole/alitretinoin/DDI-clinical-trial"
-	wget -O tests/claim-by-method-drugs-2.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/desipramine/paroxetine/DDI-clinical-trial"
+	wget -O tests/get-all-drugnames.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname"
+	wget -O tests/get-second-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/rivaroxaban"
+	wget -O tests/get-method-by-two-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/Ketoconazole/Citalopram"
+	wget -O tests/get-all-claims.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
+	wget -O tests/get-claim-by-method-and-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial"

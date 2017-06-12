@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MPEvidenceService  extends AbstractDaoService {
 
-    // get all drug names
+    // get all drug concept names
     @GET
     @Path("{sourceKey}/drugname")
     @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +51,7 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
 
 
-    // get 2nd drug names based on specified 1st drug
+    // get options of 2nd drug concept name based on specified 1st drug concept name
     @GET
     @Path("{sourceKey}/drugname/{drugConceptName}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -85,8 +85,8 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     /**
      * Get method by two drug names
-     * @param object drug name
-     * @param precipitant drug name
+     * @param 1st drug concept name
+     * @param 2nd drug concept name
      * @return
      */
     @GET
@@ -135,8 +135,8 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
     
     /**
-     * @param drug name 1
-     * @param drug name 2
+     * @param drug concept name 1
+     * @param drug concept name 2
      * @param method
      * @return
      */
@@ -149,7 +149,7 @@ public class MPEvidenceService  extends AbstractDaoService {
 	String methodDecoded = method.replaceAll("-", " ");
 	
     	// query by label, drug and evidenceType if source type not "other"
-	sql_statement = sql_statement.replaceAll("@drugname1", drugname1).replaceAll("@drugname2", drugname2).replaceAll("@method", methodDecoded);	    
+	sql_statement = sql_statement.replaceAll("@drugconceptname1", drugname1).replaceAll("@drugconceptname2", drugname2).replaceAll("@method", methodDecoded);	    
     	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 
 	if (method.equals("DDI-clinical-trial")) {
