@@ -95,7 +95,7 @@ public class MPEvidenceService  extends AbstractDaoService {
     public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNames.sql");
-    	sql_statement = sql_statement.replaceAll("@drugname1", drugname1).replaceAll("@drugname2", drugname2);
+    	sql_statement = sql_statement.replaceAll("@drugconceptname1", drugname1).replaceAll("@drugconceptname2", drugname2);
 	System.out.println(sql_statement);
 	
     	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);

@@ -33,7 +33,7 @@ test-dikb-calls:
 test-mp-calls:
 	wget -O tests/drugname.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname"
 	wget -O tests/second-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/rivaroxaban"
-	wget -O tests/method-desipramine-paroxetine.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/Ketoconazole/alitretinoin"
+	wget -O tests/method-desipramine-paroxetine.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/Ketoconazole/Citalopram"
 	wget -O tests/claim.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
 	wget -O tests/claim-by-method-drugs-1.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/ketoconazole/alitretinoin/DDI-clinical-trial"
 	wget -O tests/claim-by-method-drugs-2.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/desipramine/paroxetine/DDI-clinical-trial"

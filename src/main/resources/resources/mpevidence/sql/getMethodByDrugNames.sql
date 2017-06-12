@@ -16,6 +16,6 @@ SELECT method.entered_value, method.inferred_value, count(*) as cnts
 from method
 JOIN s ON s.id = method.mp_claim_id
 JOIN o ON o.id = method.mp_claim_id
-WHERE (o.concept_name = '@drugname1' AND s.concept_name = '@drugname2')
-OR (s.concept_name = '@drugname2' AND o.concept_name = '@drugname1')
+WHERE (o.concept_name = '@drugconceptname1' AND s.concept_name = '@drugconceptname2')
+OR (s.concept_name = '@drugconceptname1' AND o.concept_name = '@drugconceptname2')
 GROUP BY method.entered_value, method.inferred_value;
