@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap; 
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,7 +32,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MPEvidenceService  extends AbstractDaoService {
 
-    // get all drug concept names
+    /** get all drug concept names
+     * @param drug concept name 1
+    */
     @GET
     @Path("{sourceKey}/drugname")
     @Produces(MediaType.APPLICATION_JSON)
@@ -45,39 +49,52 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    DrugEntity item = new DrugEntity();
 	    item.drugConceptName = (String) rs.get("concept_name");
 	    item.drugConceptCode = (String) rs.get("concept_code");
+	    item.vocabularyId = (String) rs.get("vocabulary_id");
+	    item.conceptClassId = (String) rs.get("concept_class_id");
 	    drugList.add(item);
-	    }
+	}
 	return drugList;	  
     }
 
 
-    // get options of 2nd drug concept name based on specified 1st drug concept name
+    /** get options of 2nd drug concept name based on specified 1st drug URI
+     * @param drug URI <vocabId>-<concpet_code>
+     */
     @GET
-    @Path("{sourceKey}/drugname/{drugConceptName}")
+    @Path("{sourceKey}/drugname2/{drugURI}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugConceptName") final String drugConceptName) throws Exception {
+    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugURI") final String drugURI) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getSecondDrugName.sql");
-    	sql_statement = sql_statement.replaceAll("@drugconceptname", drugConceptName);
+
+        String [] uriList = drugURI.split("-");
+	String vocabularyId = uriList[0];
+	String conceptCode = uriList[1];
+	
+    	sql_statement = sql_statement.replaceAll("@conceptcode", conceptCode).replaceAll("@vocabularyid", vocabularyId);
 
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
+	Set<String> existsCode = new HashSet<String>();
+	MPEvidenceService service = new MPEvidenceService();
 	
 	for (Map rs: rows) {
 	    String subject = (String) rs.get("subject");
+	    String subjectVocabularyId = (String) rs.get("s_vocabulary_id");	    
 	    String subjectConceptCode = (String) rs.get("s_concept_code");
 	    String object = (String) rs.get("object");
+	    String objectVocabularyId = (String) rs.get("o_vocabulary_id");
 	    String objectConceptCode = (String) rs.get("o_concept_code");
 	    
-	    DrugEntity item = new DrugEntity();
-	    if (subject.equals(drugConceptName)) {
-		item.drugConceptName = object;
-		item.drugConceptCode = objectConceptCode;
+	    if (subjectConceptCode.equals(conceptCode) && !objectConceptCode.equals(conceptCode) && !existsCode.contains(objectConceptCode)) {
+		drugList.add(service.createDrugEntity(object, objectVocabularyId, objectConceptCode));
+		existsCode.add(objectConceptCode);
 	    } else {
-		item.drugConceptName = subject;
-		item.drugConceptCode = subjectConceptCode;
+		if (!existsCode.contains(subjectConceptCode) && !subjectConceptCode.equals(conceptCode)) {
+		    drugList.add(service.createDrugEntity(subject, subjectVocabularyId, subjectConceptCode));
+		    existsCode.add(subjectConceptCode);	       
+		}
 	    }
-	    drugList.add(item);
 	}
 	return drugList;	  
     }
@@ -177,11 +194,12 @@ public class MPEvidenceService  extends AbstractDaoService {
 
 		MPEvidenceService service = new MPEvidenceService();
 		HashMap<Integer, CTEvidence> ctEvidenceMap = service.parseCTEvidences(dataRows, materialRows, claim.subject, claim.object, claim.mp_claim_id);		
-		claim.evidences = ctEvidenceMap;
-		
+		claim.evidences = ctEvidenceMap;		
 		ctClaims.add(claim); 	    
 	    }
 	    return ctClaims;	  
+	} else if (method.equals("Statement")) {
+	    return null;
 	}
 
 	return null;    
@@ -247,7 +265,6 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    ctEvidenceMap.put(dataIdx, ctEvidence);
 	}
 
-
 	for (Map materialRs: materialRows) {
 	    int materialIdx = (Integer) materialRs.get("mp_data_index");
 	    String materialType = (String) materialRs.get("material_type");
@@ -294,4 +311,17 @@ public class MPEvidenceService  extends AbstractDaoService {
 	return ctEvidenceMap;
     }
 
+     /** create drug entity instance
+     * @param drug concept name
+     * @param vocabulary id
+     * @param drug concept code
+     * @return
+     */
+    private DrugEntity createDrugEntity(String conceptName, String vocabularyId, String conceptCode) {
+	DrugEntity item = new DrugEntity();
+	item.drugConceptName = conceptName;
+	item.vocabularyId = vocabularyId;
+	item.drugConceptCode = conceptCode;
+	return item;
+    }
 }

@@ -9,6 +9,7 @@ $ psql -h localhost -p 5432 -U user database-name -f table.sql
 
 # create index ###############################################################
 
-(1) concept table
-
+-- concept table
 CREATE INDEX concept_tb_idx ON public.concept (concept_code, vocabulary_id);
+-- mpevidence qualifier
+CREATE INDEX mp_qualifier_idx ON ohdsi.qualifier(claim_body_id, qvalue, concept_code, vocabulary_id);

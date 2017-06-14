@@ -9,5 +9,10 @@ public class DrugEntity {
 
     @JsonProperty("CONCEPT_CODE")
     public String drugConceptCode;
-		  
+
+    @JsonProperty("VOCABULARY_ID")
+    public String vocabularyId;
+
+    @JsonProperty("CONCEPT_CLASS_ID")
+    public String conceptClassId;
 }
