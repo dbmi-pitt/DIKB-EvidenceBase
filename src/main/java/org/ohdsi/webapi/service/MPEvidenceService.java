@@ -59,6 +59,7 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     /** get options of 2nd drug concept name based on specified 1st drug URI
      * @param drug URI <vocabId>-<concpet_code>
+     * @return list of DrugEntity as 2nd drug options
      */
     @GET
     @Path("{sourceKey}/drugname2/{drugURI}")
@@ -102,18 +103,25 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     /**
      * Get method by two drug names
-     * @param 1st drug concept name
-     * @param 2nd drug concept name
-     * @return
+     * @param 1st drug URI <vocabId>-<concpet_code>
+     * @param 2nd drug URI <vocabId>-<concpet_code>
+     * @return list of Method
      */
     @GET
-    @Path("{sourceKey}/method/{drugname1}/{drugname2}")
+    @Path("{sourceKey}/method/{drugURI1}/{drugURI2}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2) throws Exception {
+    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugURI1") final String drugURI1, @PathParam("drugURI2") final String drugURI2) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNames.sql");
-    	sql_statement = sql_statement.replaceAll("@drugconceptname1", drugname1).replaceAll("@drugconceptname2", drugname2);
-	System.out.println(sql_statement);
+	String [] uriList1 = drugURI1.split("-");
+	String vocabularyId1 = uriList1[0];
+	String conceptCode1 = uriList1[1];
+
+	String [] uriList2 = drugURI2.split("-");
+	String vocabularyId2 = uriList2[0];
+	String conceptCode2 = uriList2[1];
+	
+    	sql_statement = sql_statement.replaceAll("@conceptcode1", conceptCode1).replaceAll("@conceptcode2", conceptCode2).replaceAll("@vocabularyid1", vocabularyId1).replaceAll("@vocabularyid2", vocabularyId2);
 	
     	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
     	List<Method> methodList = new ArrayList<Method>();
