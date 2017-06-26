@@ -28,5 +28,5 @@ JOIN s ON s.id = method.mp_claim_id
 JOIN o ON o.id = method.mp_claim_id
 JOIN p ON p.id = method.mp_claim_id
 WHERE method.method = '@method'
-AND (s.concept_name= '@conceptcode1' AND o.concept_name = '@conceptcode2')
-OR (o.concept_name = '@conceptcode1' AND s.concept_name = '@conceptcode2');
+AND (s.concept_name= '@conceptname1' AND o.concept_name = '@conceptname2')
+OR (o.concept_name = '@conceptname1' AND s.concept_name = '@conceptname2');

@@ -174,7 +174,7 @@ public class MPEvidenceService  extends AbstractDaoService {
 	String methodDecoded = method.replaceAll("-", " ");
 	
     	// query by label, drug and evidenceType if source type not "other"
-	sql_statement = sql_statement.replaceAll("@drugconceptname1", drugname1).replaceAll("@drugconceptname2", drugname2).replaceAll("@method", methodDecoded);	    
+	sql_statement = sql_statement.replaceAll("@conceptname1", drugname1).replaceAll("@conceptname2", drugname2).replaceAll("@method", methodDecoded);	    
     	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 
 	if (method.equals("DDI-clinical-trial")) {
