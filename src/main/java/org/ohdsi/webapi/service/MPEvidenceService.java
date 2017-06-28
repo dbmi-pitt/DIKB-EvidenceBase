@@ -28,22 +28,37 @@ import org.ohdsi.webapi.mpevidence.CTEvidence;
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
 
+
 @Path("mpevidence/")
 @Component
 public class MPEvidenceService  extends AbstractDaoService {
 
+    // concept code mapping initialization
+    private static final Map<String, String> conceptCodeMap;
+    static {
+	conceptCodeMap = new HashMap<String, String>();
+	conceptCodeMap.put("precipitant", "DIDEO_00000013");
+	conceptCodeMap.put("object", "DIDEO_00000012");
+    }
+    
+
     /** get all drug concept names
      * @param drug concept name 1
+     * @param drug role 1
     */
     @GET
-    @Path("{sourceKey}/drugname")
+    @Path("{sourceKey}/drugname/{drugRole}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllDrugName(@PathParam("sourceKey") String sourceKey) throws Exception {
+    public Collection<DrugEntity> getAllDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugRole") String drugRole) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllDrugNames.sql");
-	List<DrugEntity> drugList = new ArrayList<DrugEntity>();	    
-	List<String> filter = new ArrayList<String>();
+	
+	if (drugRole.equals("precipitant") || drugRole.equals("object")) {
+	    sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllDrugNamesByRole.sql");
+	    sql_statement = sql_statement.replaceAll("@roleconceptcode", conceptCodeMap.get(drugRole));
+	}
 
+	List<DrugEntity> drugList = new ArrayList<DrugEntity>();	    
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	for (Map rs: rows) {
 	    DrugEntity item = new DrugEntity();
@@ -58,21 +73,26 @@ public class MPEvidenceService  extends AbstractDaoService {
 
 
     /** get options of 2nd drug concept name based on specified 1st drug URI
-     * @param drug URI <vocabId>-<concpet_code>
+     * @param drug URI <vocabId>-<concpet_code> 1
+     * @param drug role 1
      * @return list of DrugEntity as 2nd drug options
      */
     @GET
-    @Path("{sourceKey}/drugname2/{drugURI}")
+    @Path("{sourceKey}/drugname2/{drug1URI}/{drug1Role}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<DrugEntity> getAllPrecipitantDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drugURI") final String drugURI) throws Exception {
+    public Collection<DrugEntity> getSecondDrugName(@PathParam("sourceKey") String sourceKey, @PathParam("drug1URI") final String drug1URI, @PathParam("drug1Role") final String drug1Role) throws Exception {
 	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getSecondDrugName.sql");
-
-        String [] uriList = drugURI.split("-");
-	String vocabularyId = uriList[0];
-	String conceptCode = uriList[1];
 	
-    	sql_statement = sql_statement.replaceAll("@conceptcode", conceptCode).replaceAll("@vocabularyid", vocabularyId);
+	if (drug1Role.equals("precipitant") || drug1Role.equals("object")) {
+	    sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getSecondDrugNameWithRole.sql");
+	    sql_statement = sql_statement.replaceAll("@roleconceptcode", conceptCodeMap.get(drug1Role));
+	}
+
+        String [] uriList = drug1URI.split("-");
+	String vocabularyId = uriList[0];
+	String conceptCode = uriList[1];	
+    	sql_statement = sql_statement.replaceAll("@conceptcode", conceptCode).replaceAll("@vocabularyid", vocabularyId).replaceAll("@roleconceptcode", "");
 
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
@@ -105,14 +125,21 @@ public class MPEvidenceService  extends AbstractDaoService {
      * Get method by two drug names
      * @param 1st drug URI <vocabId>-<concpet_code>
      * @param 2nd drug URI <vocabId>-<concpet_code>
+     * @param drug role 1
      * @return list of Method
      */
     @GET
-    @Path("{sourceKey}/method/{drugURI1}/{drugURI2}")
+    @Path("{sourceKey}/method/{drugURI1}/{drugURI2}/{drug1Role}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugURI1") final String drugURI1, @PathParam("drugURI2") final String drugURI2) throws Exception {
+    public Collection<Method> getEvidenceType(@PathParam("sourceKey") String sourceKey, @PathParam("drugURI1") final String drugURI1, @PathParam("drugURI2") final String drugURI2, @PathParam("drug1Role") final String drug1Role) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
 	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNames.sql");
+
+	if (drug1Role.equals("precipitant") || drug1Role.equals("object")) {
+	    sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMethodByDrugNamesAndRole.sql");
+	    sql_statement = sql_statement.replaceAll("@roleconceptcode1", conceptCodeMap.get(drug1Role));
+	}
+	
 	String [] uriList1 = drugURI1.split("-");
 	String vocabularyId1 = uriList1[0];
 	String conceptCode1 = uriList1[1];
@@ -135,43 +162,27 @@ public class MPEvidenceService  extends AbstractDaoService {
     	}
     	return methodList;	  
     }
-
-
-    @GET
-    @Path("{sourceKey}/claim")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<Claim> getAllClaim(@PathParam("sourceKey") String sourceKey) throws Exception {
-	Source source = getSourceRepository().findBySourceKey(sourceKey);
-	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllMPClaim.sql");
-	List<Claim> claimList = new ArrayList<Claim>();
-	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-	
-	for (Map rs: rows) {
-	    
-	    Claim claim = new Claim();	    
-	    claim.label = (String) rs.get("label");
-	    claim.method = (String) rs.get("method");
-	    claim.subject = (String) rs.get("subject");
-	    claim.object = (String) rs.get("object");
-	    claim.claim_text = (String) rs.get("claim_text");
-	    claimList.add(claim);
-	}
-	return claimList;
-    }
+    
     
     /**
      * @param drug concept name 1
      * @param drug concept name 2
      * @param method
+     * @param drug role 1
      * @return
      */
     @GET
-    @Path("{sourceKey}/search/{drugname1}/{drugname2}/{method}")
+    @Path("{sourceKey}/search/{drugname1}/{drugname2}/{method}/{drug1Role}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<CTClaim> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2, @PathParam("method") final String method) throws Exception {
+    public Collection<CTClaim> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2, @PathParam("method") final String method, @PathParam("drug1Role") final String drug1Role) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
     	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getClaimByMethodAndDrug.sql");
 	String methodDecoded = method.replaceAll("-", " ");
+
+	if (drug1Role.equals("precipitant") || drug1Role.equals("object")) {
+	    sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getClaimByMethodAndDrugAndRole.sql");
+	    sql_statement = sql_statement.replaceAll("@roleconceptcode1", conceptCodeMap.get(drug1Role));
+	}
 	
     	// query by label, drug and evidenceType if source type not "other"
 	sql_statement = sql_statement.replaceAll("@conceptname1", drugname1).replaceAll("@conceptname2", drugname2).replaceAll("@method", methodDecoded);	    
@@ -331,5 +342,28 @@ public class MPEvidenceService  extends AbstractDaoService {
 	item.vocabularyId = vocabularyId;
 	item.drugConceptCode = conceptCode;
 	return item;
+    }
+
+
+    @GET
+    @Path("{sourceKey}/claim")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Collection<Claim> getAllClaim(@PathParam("sourceKey") String sourceKey) throws Exception {
+	Source source = getSourceRepository().findBySourceKey(sourceKey);
+	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getAllMPClaim.sql");
+	List<Claim> claimList = new ArrayList<Claim>();
+	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
+	
+	for (Map rs: rows) {
+	    
+	    Claim claim = new Claim();	    
+	    claim.label = (String) rs.get("label");
+	    claim.method = (String) rs.get("method");
+	    claim.subject = (String) rs.get("subject");
+	    claim.object = (String) rs.get("object");
+	    claim.claim_text = (String) rs.get("claim_text");
+	    claimList.add(claim);
+	}
+	return claimList;
     }
 }

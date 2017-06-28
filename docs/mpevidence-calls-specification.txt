@@ -1,21 +1,39 @@
 (1) UC: 1st drug name auto completion
-Query: get all subject and object qualifier names
-Condition: None
+Query: get subject and object qualifier names based on drug role
+Input: drug role
 Result: qualifier name
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/{drugRole}
+
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/precipitant
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/object
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/any
 
 (2) UC: 2nd drug name auto completion
 Query: get all 2nd drug name options based on 1st specified drug
-Condition: 1st drug name
-Result: qualifier name
+Input: 1st drug name and role
+Result: qualifier name for 2nd drug
+
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/{drug1URI}/{drug1Role}
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/precipitant
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/object
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/any
 
 (3) UC: List all claim, method information
 Query: get claim (subject, predicate, object), method (entered_method, inferred_method)
 Condition: 1st drugname, 2nd drugname (optional)
 Result: 1st drugname, 2nd drugname, relationship, method, inferred method
 
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/{drug1URI}/{drug2URI}/{drug1Role}
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/precipitant
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/object
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/any
+
 (4) UC: List data and material as evidence for specified claim
 Condition: method, 1st drugname, 2nd drugname
 Query:
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/{conceptName1}/{conceptName2}/{Method}/{drug1Role}
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/precipitant
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/object
 
 4.1 When method is 'DDI clinical trial'
 get evidence relationship
