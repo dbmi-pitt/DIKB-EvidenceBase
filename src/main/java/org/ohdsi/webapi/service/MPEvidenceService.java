@@ -20,10 +20,14 @@ import org.ohdsi.webapi.source.Source;
 import org.ohdsi.webapi.mpevidence.Statement;
 import org.ohdsi.webapi.mpevidence.Claim;
 import org.ohdsi.webapi.mpevidence.CTClaim;
+import org.ohdsi.webapi.mpevidence.CRClaim;
+import org.ohdsi.webapi.mpevidence.PhenotypeClaim;
 import org.ohdsi.webapi.mpevidence.DrugEntity;
 import org.ohdsi.webapi.mpevidence.Method;
 import org.ohdsi.webapi.mpevidence.Evidence;
 import org.ohdsi.webapi.mpevidence.CTEvidence;
+import org.ohdsi.webapi.mpevidence.CREvidence;
+import org.ohdsi.webapi.mpevidence.PhenotypeEvidence;
 
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
@@ -174,7 +178,7 @@ public class MPEvidenceService  extends AbstractDaoService {
     @GET
     @Path("{sourceKey}/search/{drugname1}/{drugname2}/{method}/{drug1Role}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<CTClaim> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2, @PathParam("method") final String method, @PathParam("drug1Role") final String drug1Role) throws Exception {
+    public Collection<Object> searchEvidence(@PathParam("sourceKey") String sourceKey, @PathParam("drugname1") final String drugname1, @PathParam("drugname2") final String drugname2, @PathParam("method") final String method, @PathParam("drug1Role") final String drug1Role) throws Exception {
     	Source source = getSourceRepository().findBySourceKey(sourceKey);
     	String sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getClaimByMethodAndDrug.sql");
 	String methodDecoded = method.replaceAll("-", " ");
@@ -184,44 +188,51 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    sql_statement = sql_statement.replaceAll("@roleconceptcode1", conceptCodeMap.get(drug1Role));
 	}
 	
-    	// query by label, drug and evidenceType if source type not "other"
+    	// query claim by drug names and evidenceType 
 	sql_statement = sql_statement.replaceAll("@conceptname1", drugname1).replaceAll("@conceptname2", drugname2).replaceAll("@method", methodDecoded);	    
     	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
-
-	if (method.equals("DDI-clinical-trial")) {
-	    List<CTClaim> ctClaims = new ArrayList<CTClaim>();
-	    for (Map rs: rows) {
-
-		// claim information
-		CTClaim claim = new CTClaim();
-		claim.mp_claim_id  = (Integer) rs.get("mp_claim_id");
-		claim.claim_text = (String) rs.get("claim_text");
-		claim.method = methodDecoded;
-		claim.subject = (String) rs.get("subject");
-		claim.object = (String) rs.get("object");
-		claim.relationship = (String) rs.get("relationship");
-
-		// query data for claim
-		String data_sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getDataByClaimId.sql");
-		data_sql_statement = data_sql_statement.replace("@claimId", String.valueOf(claim.mp_claim_id));		
-		List<Map<String, Object>> dataRows = getSourceJdbcTemplate(source).queryForList(data_sql_statement);
+	List<Object> claims = new ArrayList<Object>();
+	
+	for (Map rs: rows) {	    
+	    int claimId = (Integer) rs.get("mp_claim_id");	    
+	    String claimText = (String) rs.get("claim_text");
+	    String subject = (String) rs.get("subject");
+	    String object = (String) rs.get("object");
+	    String relationship = (String) rs.get("relationship");
 		
-		// query material for claim
-		String material_sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMaterialByClaimId.sql");
-		material_sql_statement = material_sql_statement.replace("@claimId", String.valueOf(claim.mp_claim_id));		
-		List<Map<String, Object>> materialRows = getSourceJdbcTemplate(source).queryForList(material_sql_statement);
+	    // query data for claim
+	    String data_sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getDataByClaimId.sql");
+	    data_sql_statement = data_sql_statement.replace("@claimId", String.valueOf(claimId));		
+	    List<Map<String, Object>> dataRows = getSourceJdbcTemplate(source).queryForList(data_sql_statement);
+	    
+	    // query material for claim
+	    String material_sql_statement = ResourceHelper.GetResourceAsString("/resources/mpevidence/sql/getMaterialByClaimId.sql");
+	    material_sql_statement = material_sql_statement.replace("@claimId", String.valueOf(claimId));		
+	    List<Map<String, Object>> materialRows = getSourceJdbcTemplate(source).queryForList(material_sql_statement);
+	    
+	    MPEvidenceService service = new MPEvidenceService();
+	    
+	    if (method.equals("DDI-clinical-trial")) {
 
-		MPEvidenceService service = new MPEvidenceService();
-		HashMap<Integer, CTEvidence> ctEvidenceMap = service.parseCTEvidences(dataRows, materialRows, claim.subject, claim.object, claim.mp_claim_id);		
-		claim.evidences = ctEvidenceMap;		
-		ctClaims.add(claim); 	    
+		CTClaim ctClaim = new CTClaim(claimId, subject, object, methodDecoded, relationship, claimText);		
+		HashMap<Integer, CTEvidence> ctEvidenceMap = service.parseCTEvidences(dataRows, materialRows, subject, object, claimId);
+		ctClaim.evidences = ctEvidenceMap;		
+		claims.add(ctClaim);
+		
+	    } else if (method.equals("Statement")) {
+		Claim claim = new Claim(claimId, subject, object, methodDecoded, relationship, claimText);
+		claims.add(claim);
+		
+	    } else if (method.equals("Phenotype clinical study")) {
+		PhenotypeClaim phClaim = new PhenotypeClaim(claimId, subject, object, methodDecoded, relationship, claimText);
+		claims.add(phClaim);
+		
+	    } else if (method.equals("Case report")) {
+		CRClaim crClaim = new CRClaim(claimId, subject, object, methodDecoded, relationship, claimText);
+		claims.add(crClaim);
 	    }
-	    return ctClaims;	  
-	} else if (method.equals("Statement")) {
-	    return null;
 	}
-
-	return null;    
+	return claims;
     }
 
     
@@ -355,13 +366,15 @@ public class MPEvidenceService  extends AbstractDaoService {
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	
 	for (Map rs: rows) {
+	    int claimId = (Integer) rs.get("mp_claim_id");
+	    String method = (String) rs.get("method");
+	    String methodDecoded = method.replaceAll("-", " ");	    
+	    String subject = (String) rs.get("subject");
+	    String object = (String) rs.get("object");
+	    String relationship = (String) rs.get("relationship");
+	    String claimText = (String) rs.get("claim_text");
 	    
-	    Claim claim = new Claim();	    
-	    claim.label = (String) rs.get("label");
-	    claim.method = (String) rs.get("method");
-	    claim.subject = (String) rs.get("subject");
-	    claim.object = (String) rs.get("object");
-	    claim.claim_text = (String) rs.get("claim_text");
+	    Claim claim = new Claim(claimId, subject, object, methodDecoded, relationship, claimText);	    
 	    claimList.add(claim);
 	}
 	return claimList;
