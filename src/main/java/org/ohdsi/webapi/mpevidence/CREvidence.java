@@ -5,6 +5,10 @@ import org.ohdsi.webapi.mpevidence.Evidence;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CREvidence extends Evidence{
+
+    public CREvidence(Integer claimId, Integer evidenceIdx, Boolean evRelationship) {
+	super(claimId, evidenceIdx, evRelationship);
+    }
     
     @JsonProperty("dose1")
     public String dose1;

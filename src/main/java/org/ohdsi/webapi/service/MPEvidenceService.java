@@ -251,15 +251,13 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    String dataType = (String) dataRs.get("data_type");
 	    String dataFieldType = (String) dataRs.get("data_field_type");
 	    String valueStr = (String) dataRs.get("value_as_string");
+	    Boolean evRelationship = (Boolean) dataRs.get("ev_supports");
 	    
 	    CTEvidence ctEvidence;
-	    if (ctEvidenceMap.containsKey(dataIdx)) {
+	    if (ctEvidenceMap.containsKey(dataIdx)) 
 		ctEvidence = ctEvidenceMap.get(dataIdx);
-	    } else {
-		ctEvidence = new CTEvidence();
-		ctEvidence.mp_claim_id = claimId;
-		ctEvidence.evidence_index = dataIdx;
-	    }
+	    else 
+		ctEvidence = new CTEvidence(claimId, dataIdx, evRelationship);
 		    
 	    if (dataType.equals("auc")) {
 		if (dataFieldType.equals("value")) {
@@ -302,15 +300,14 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    String materialType = (String) materialRs.get("material_type");
 	    String materialFieldType = (String) materialRs.get("material_field_type");
 	    String valueStr = (String) materialRs.get("value_as_string");
+	    Boolean evRelationship = (Boolean) materialRs.get("ev_supports");
 	    
 	    CTEvidence ctEvidence;
-	    if (ctEvidenceMap.containsKey(materialIdx)) {
+	    if (ctEvidenceMap.containsKey(materialIdx))
 		ctEvidence = ctEvidenceMap.get(materialIdx);
-	    } else {
-		ctEvidence = new CTEvidence();
-		ctEvidence.mp_claim_id = claimId;
-		ctEvidence.evidence_index = materialIdx;
-	    }
+	    else
+		ctEvidence = new CTEvidence(claimId, materialIdx, evRelationship);
+	    
 		    
 	    if (materialType.equals("precipitant_dose")) {
 		if (materialFieldType.equals("value")) {
@@ -336,29 +333,19 @@ public class MPEvidenceService  extends AbstractDaoService {
 		} else if (materialFieldType.equals("regimens")) {
 		    ctEvidence.dose2Regimens = valueStr;
 		}		
-	    }	    
+	    } else if (materialType.equals("participants")) {
+		if (materialFieldType.equals("value")) {
+		    ctEvidence.participants = valueStr;
+		}
+	    }    
 	    ctEvidenceMap.put(materialIdx, ctEvidence);
 	}
 	
 	return ctEvidenceMap;
     }
 
-     /** create drug entity instance
-     * @param drug concept name
-     * @param vocabulary id
-     * @param drug concept code
-     * @return
-     */
-    private DrugEntity createDrugEntity(String conceptName, String vocabularyId, String conceptCode) {
-	DrugEntity item = new DrugEntity();
-	item.drugConceptName = conceptName;
-	item.vocabularyId = vocabularyId;
-	item.drugConceptCode = conceptCode;
-	return item;
-    }
 
-
-     /**
+    /**
      * @param Case report data query results 
      * @param Case report material query results
      * @return
@@ -371,14 +358,13 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    String dataType = (String) dataRs.get("data_type");
 	    String dataFieldType = (String) dataRs.get("data_field_type");
 	    String valueStr = (String) dataRs.get("value_as_string");
+	    Boolean evRelationship = (Boolean) dataRs.get("ev_supports");
 	    
 	    CREvidence crEvidence;
 	    if (crEvidenceMap.containsKey(dataIdx)) {
 		crEvidence = crEvidenceMap.get(dataIdx);
 	    } else {
-		crEvidence = new CREvidence();
-		crEvidence.mp_claim_id = claimId;
-		crEvidence.evidence_index = dataIdx;
+		crEvidence = new CREvidence(claimId, dataIdx, evRelationship);
 	    }
 	    
 	    if (dataType.equals("reviewer")) {
@@ -407,16 +393,14 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    String materialType = (String) materialRs.get("material_type");
 	    String materialFieldType = (String) materialRs.get("material_field_type");
 	    String valueStr = (String) materialRs.get("value_as_string");
+	    Boolean evRelationship = (Boolean) materialRs.get("ev_supports");
 	    
 	    CREvidence crEvidence;
-	    if (crEvidenceMap.containsKey(materialIdx)) {
+	    if (crEvidenceMap.containsKey(materialIdx))
 		crEvidence = crEvidenceMap.get(materialIdx);
-	    } else {
-		crEvidence = new CREvidence();
-		crEvidence.mp_claim_id = claimId;
-		crEvidence.evidence_index = materialIdx;
-	    }
-		    
+	    else
+		crEvidence = new CREvidence(claimId, materialIdx, evRelationship);
+	    		    
 	    if (materialType.equals("precipitant_dose")) {
 		if (materialFieldType.equals("value")) {
 		    crEvidence.dose1 = valueStr;
@@ -472,4 +456,20 @@ public class MPEvidenceService  extends AbstractDaoService {
 	}
 	return claimList;
     }
+
+
+    /** create drug entity instance
+     * @param drug concept name
+     * @param vocabulary id
+     * @param drug concept code
+     * @return
+     */
+    private DrugEntity createDrugEntity(String conceptName, String vocabularyId, String conceptCode) {
+	DrugEntity item = new DrugEntity();
+	item.drugConceptName = conceptName;
+	item.vocabularyId = vocabularyId;
+	item.drugConceptCode = conceptCode;
+	return item;
+    }
+
 }

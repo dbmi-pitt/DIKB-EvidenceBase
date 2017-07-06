@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CTEvidence extends Evidence{
 
+    public CTEvidence(Integer claimId, Integer evidenceIdx, Boolean evRelationship) {
+	super(claimId, evidenceIdx, evRelationship);
+    }    
+
     @JsonProperty("participants")
     public String participants;
 
