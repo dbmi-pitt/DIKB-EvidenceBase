@@ -20,7 +20,7 @@ http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/any
 
 (3) UC: List all claim, method information
 Query: get claim (subject, predicate, object), method (entered_method, inferred_method)
-Condition: 1st drugname, 2nd drugname (optional)
+Input: 1st drugname, 2nd drugname (optional)
 Result: 1st drugname, 2nd drugname, relationship, method, inferred method
 
 http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/{drug1URI}/{drug2URI}/{drug1Role}
