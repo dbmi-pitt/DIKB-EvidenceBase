@@ -216,7 +216,7 @@ public class MPEvidenceService  extends AbstractDaoService {
 
 		CTClaim ctClaim = new CTClaim(claimId, subject, object, methodDecoded, relationship, claimText);		
 		HashMap<Integer, CTEvidence> ctEvidenceMap = service.parseCTEvidences(dataRows, materialRows, subject, object, claimId);
-		ctClaim.evidences = ctEvidenceMap;		
+		ctClaim.evidences = ctEvidenceMap;
 		claims.add(ctClaim);
 		
 	    } else if (method.equals("Statement")) {
@@ -227,8 +227,10 @@ public class MPEvidenceService  extends AbstractDaoService {
 		PhenotypeClaim phClaim = new PhenotypeClaim(claimId, subject, object, methodDecoded, relationship, claimText);
 		claims.add(phClaim);
 		
-	    } else if (method.equals("Case report")) {
+	    } else if (method.equals("Case-Report")) {
 		CRClaim crClaim = new CRClaim(claimId, subject, object, methodDecoded, relationship, claimText);
+		HashMap<Integer, CREvidence> crEvidenceMap = service.parseCREvidences(dataRows, materialRows, subject, object, claimId);
+		crClaim.evidences = crEvidenceMap;
 		claims.add(crClaim);
 	    }
 	}
@@ -237,8 +239,8 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     
      /**
-     * @param CT data query results 
-     * @param CT material query results
+     * @param Clinical trial data query results 
+     * @param Clinical trial material query results
      * @return
      */
     private HashMap<Integer, CTEvidence> parseCTEvidences(List<Map<String, Object>> dataRows, List<Map<String, Object>> materialRows, String subject, String object, int claimId) {
@@ -356,6 +358,97 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
 
 
+     /**
+     * @param Case report data query results 
+     * @param Case report material query results
+     * @return
+     */
+    private HashMap<Integer, CREvidence> parseCREvidences(List<Map<String, Object>> dataRows, List<Map<String, Object>> materialRows, String subject, String object, int claimId) {
+	HashMap <Integer, CREvidence> crEvidenceMap = new HashMap<Integer, CREvidence>();
+	
+	for (Map dataRs: dataRows) {
+	    int dataIdx = (Integer) dataRs.get("mp_data_index");
+	    String dataType = (String) dataRs.get("data_type");
+	    String dataFieldType = (String) dataRs.get("data_field_type");
+	    String valueStr = (String) dataRs.get("value_as_string");
+	    
+	    CREvidence crEvidence;
+	    if (crEvidenceMap.containsKey(dataIdx)) {
+		crEvidence = crEvidenceMap.get(dataIdx);
+	    } else {
+		crEvidence = new CREvidence();
+		crEvidence.mp_claim_id = claimId;
+		crEvidence.evidence_index = dataIdx;
+	    }
+	    
+	    if (dataType.equals("reviewer")) {
+		if (dataFieldType.equals("reviewer")) {
+		    crEvidence.reviewer = valueStr;
+		} else if (dataFieldType.equals("date")) {
+		    crEvidence.reviewerdate = valueStr;
+		} else if (dataFieldType.equals("total")) {
+		    crEvidence.reviewertotal = valueStr;
+		} else if (dataFieldType.equals("lackinfo")) {
+		    crEvidence.reviewerlackinfo = valueStr;
+		}
+	    } else if (dataType.equals("dipsquestion")) {
+		// dataFieldType (q1, q2 - q10)
+		System.out.println(crEvidence.dipsquestion);
+		if (crEvidence.dipsquestion == null) {
+		    crEvidence.dipsquestion = new HashMap<String, String>();
+		}
+		crEvidence.dipsquestion.put(dataFieldType, valueStr);		
+	    } 
+	    crEvidenceMap.put(dataIdx, crEvidence);
+	}
+
+	for (Map materialRs: materialRows) {
+	    int materialIdx = (Integer) materialRs.get("mp_data_index");
+	    String materialType = (String) materialRs.get("material_type");
+	    String materialFieldType = (String) materialRs.get("material_field_type");
+	    String valueStr = (String) materialRs.get("value_as_string");
+	    
+	    CREvidence crEvidence;
+	    if (crEvidenceMap.containsKey(materialIdx)) {
+		crEvidence = crEvidenceMap.get(materialIdx);
+	    } else {
+		crEvidence = new CREvidence();
+		crEvidence.mp_claim_id = claimId;
+		crEvidence.evidence_index = materialIdx;
+	    }
+		    
+	    if (materialType.equals("precipitant_dose")) {
+		if (materialFieldType.equals("value")) {
+		    crEvidence.dose1 = valueStr;
+		} else if (materialFieldType.equals("drugname")) {
+		    crEvidence.dose1Name = valueStr;
+		} else if (materialFieldType.equals("duration")) {
+		    crEvidence.dose1Duration = valueStr;
+		} else if (materialFieldType.equals("formulation")) {
+		    crEvidence.dose1Formulation = valueStr;
+		} else if (materialFieldType.equals("regimens")) {
+		    crEvidence.dose1Regimens = valueStr;
+		}		
+	    } else if (materialType.equals("object_dose")) {
+		if (materialFieldType.equals("value")) {
+		    crEvidence.dose2 = valueStr;
+		} else if (materialFieldType.equals("drugname")) {
+		    crEvidence.dose2Name = valueStr;
+		} else if (materialFieldType.equals("duration")) {
+		    crEvidence.dose2Duration = valueStr;
+		} else if (materialFieldType.equals("formulation")) {
+		    crEvidence.dose2Formulation = valueStr;
+		} else if (materialFieldType.equals("regimens")) {
+		    crEvidence.dose2Regimens = valueStr;
+		}		
+	    }	    
+	    crEvidenceMap.put(materialIdx, crEvidence);
+	}
+	
+	return crEvidenceMap;
+    }
+    
+    
     @GET
     @Path("{sourceKey}/claim")
     @Produces(MediaType.APPLICATION_JSON)
