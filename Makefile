@@ -34,13 +34,19 @@ test-mp-calls:
 	wget -O tests/get-all-drugnames-as-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/precipitant"
 	wget -O tests/get-all-drugnames-as-object.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/object"
 	wget -O tests/get-all-drugnames.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname/any"
+
 	wget -O tests/get-second-drug-as-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/precipitant"
 	wget -O tests/get-second-drug-as-object.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/object"
 	wget -O tests/get-second-drug.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/drugname2/rxnorm-4719/any"
+
 	wget -O tests/get-method-by-two-drugs-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/precipitant"
 	wget -O tests/get-method-by-two-drugs-object.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/object"
 	wget -O tests/get-method-by-two-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/any"
+
 	wget -O tests/get-claim-by-method-and-drugs-precipitant.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/precipitant"
 	wget -O tests/get-claim-by-method-and-drugs-object.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/object"
 	wget -O tests/get-claim-by-method-and-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/any"
+
+	wget -O tests/get-case-report-by-method-and-drugs.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Gemfibrozil/Warfarin/Case-Report/any"
+
 	wget -O tests/get-all-claims.json "http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/claim"
