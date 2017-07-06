@@ -29,17 +29,19 @@ http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-
 http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/method/rxnorm-6135/rxnorm-2556/any
 
 (4) UC: List data and material as evidence for specified claim
-Condition: method, 1st drugname, 2nd drugname
+Input: method, 1st drugname, 2nd drugname, 1st drug role
 Query:
 http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/{conceptName1}/{conceptName2}/{Method}/{drug1Role}
-http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/precipitant
-http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/object
 
 4.1 When method is 'DDI clinical trial'
 get evidence relationship
 get number of participants
 get drug 1 dose (value, formulation, duration, regimens), drug 2 dose
 get data ratio: auc ratio (value, type, direction), cmax, clearance, halflife
+
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/any
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/precipitant
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Ketoconazole/Citalopram/DDI-clinical-trial/object
 
 4.2 When method is 'Phenotype clinical study'
 get evidence relationship
@@ -53,6 +55,8 @@ get evidence relationship
 get drug 1 dose (value, formulation, duration, regimens), drug 2 dose
 get reviewer information (date, reviewer, total, lackInfo)
 get dips questions (q1, q2 - q10)
+
+http://localhost:8090/WebAPI/mpevidence/POSTGRES-DIKB/search/Gemfibrozil/Warfarin/Case-Report/any
 
 4.4 When method is 'Experiments'
 get evidence relationship
