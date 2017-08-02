@@ -213,7 +213,6 @@ public class MPEvidenceService  extends AbstractDaoService {
 	    MPEvidenceService service = new MPEvidenceService();
 	    
 	    if (method.equals("DDI-clinical-trial")) {
-
 		CTClaim ctClaim = new CTClaim(claimId, subject, object, methodDecoded, relationship, claimText);		
 		HashMap<Integer, CTEvidence> ctEvidenceMap = service.parseCTEvidences(dataRows, materialRows, subject, object, claimId);
 		ctClaim.evidences = ctEvidenceMap;
@@ -225,6 +224,8 @@ public class MPEvidenceService  extends AbstractDaoService {
 		
 	    } else if (method.equals("Phenotype clinical study")) {
 		PhenotypeClaim phClaim = new PhenotypeClaim(claimId, subject, object, methodDecoded, relationship, claimText);
+		// HashMap<Integer, PhenotypeEvidence> phEvidenceMap = service.parsePHEvidences(dataRows, materialRows, subject, object, claimId);
+		// phClaim.evidences = phEvidenceMap;
 		claims.add(phClaim);
 		
 	    } else if (method.equals("Case-Report")) {
@@ -429,7 +430,19 @@ public class MPEvidenceService  extends AbstractDaoService {
 	
 	return crEvidenceMap;
     }
-    
+
+
+    // /**
+    //  * @param Phenotype clinical study data query results 
+    //  * @param Phenotype material study query results
+    //  * @return
+    //  */
+    // private HashMap<Integer, PhenotypeEvidence> parsePHEvidences(List<Map<String, Object>> dataRows, List<Map<String, Object>> materialRows, String subject, String object, int claimId)
+    // {
+    // 	HashMap <Integer, PhenotypeEvidence> phEvidenceMap = new HashMap<Integer, PhenotypeEvidence>();
+	
+    // }
+
     
     @GET
     @Path("{sourceKey}/claim")
