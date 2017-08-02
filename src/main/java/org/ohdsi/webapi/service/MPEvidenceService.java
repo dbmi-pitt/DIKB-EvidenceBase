@@ -32,7 +32,9 @@ import org.ohdsi.webapi.mpevidence.PhenotypeEvidence;
 import org.ohdsi.webapi.helper.ResourceHelper;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * @author Yifan Ning
+ */
 @Path("mpevidence/")
 @Component
 public class MPEvidenceService  extends AbstractDaoService {
@@ -46,9 +48,12 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
     
 
-    /** get all drug concept names
-     * @param drug concept name 1
-     * @param drug role 1
+    /** 
+     * @summary Query all drug concept names that appears in Micropublication Claim in evidence base
+     * @param sourceKey path parameter specifying the source key identifying the
+     * source to use for access to the set of vocabulary tables
+     * @param drugRole drug role as precipitant or object for 1st drug in Micropublication Claim
+     * @return list of DrugEntity
     */
     @GET
     @Path("{sourceKey}/drugname/{drugRole}")
@@ -76,10 +81,13 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
 
 
-    /** get options of 2nd drug concept name based on specified 1st drug URI
-     * @param drug URI <vocabId>-<concpet_code> 1
-     * @param drug role 1
-     * @return list of DrugEntity as 2nd drug options
+    /** 
+     * @summary Query all second drug concept names that interact with specified first drug
+     * @param sourceKey path parameter specifying the source key identifying the
+     * source to use for access to the set of vocabulary tables
+     * @param drug1URI drug 1 URI in format "[vocabulary id]-[concpet code]"
+     * @param drug1Role drug role as precipitant or object for 1st drug in Micropublication Claim
+     * @return list of DrugEntity as options for 2nd drug 
      */
     @GET
     @Path("{sourceKey}/drugname2/{drug1URI}/{drug1Role}")
@@ -124,13 +132,14 @@ public class MPEvidenceService  extends AbstractDaoService {
 	return drugList;	  
     }
 
-
-    /**
-     * Get method by two drug URIs
-     * @param 1st drug URI <vocabId>-<concpet_code>
-     * @param 2nd drug URI <vocabId>-<concpet_code>
-     * @param drug role 1
-     * @return list of Method
+    /** 
+     * @summary Query Micropublication Claim by specifying involved drugs 
+     * @param sourceKey path parameter specifying the source key identifying the
+     * source to use for access to the set of vocabulary tables
+     * @param drugURI1 drug 1 URI in format "[vocabulary id]-[concpet code]"
+     * @param drugURI2 drug 2 URI in format "[vocabulary id]-[concpet code]"
+     * @param drug1Role drug role as precipitant or object for 1st drug in Micropublication Claim
+     * @return list of Claim tagged by Method
      */
     @GET
     @Path("{sourceKey}/method/{drugURI1}/{drugURI2}/{drug1Role}")
@@ -168,13 +177,16 @@ public class MPEvidenceService  extends AbstractDaoService {
     }
     
     
-    /**
-     * @param drug concept name 1
-     * @param drug concept name 2
-     * @param method
-     * @param drug role 1
-     * @return
-     */
+    /** 
+     * @summary Query Micropublication Claim detailed information and Evidences associated with 
+     * @param sourceKey path parameter specifying the source key identifying the
+     * source to use for access to the set of vocabulary tables
+     * @param drugname1 1st drug standardized concept name
+     * @param drugname2 2nd drug standardized concept name
+     * @param method Micropublication method
+     * @param drug1Role drug role as precipitant or object for 1st drug in Micropublication Claim
+     * @return list of Claim with evidences information
+     */    
     @GET
     @Path("{sourceKey}/search/{drugname1}/{drugname2}/{method}/{drug1Role}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -240,9 +252,10 @@ public class MPEvidenceService  extends AbstractDaoService {
 
     
      /**
+     * @summary parse clinical trial evidences
      * @param Clinical trial data query results 
      * @param Clinical trial material query results
-     * @return
+     * @return list of clinical trial evidences
      */
     private HashMap<Integer, CTEvidence> parseCTEvidences(List<Map<String, Object>> dataRows, List<Map<String, Object>> materialRows, String subject, String object, int claimId) {
 	HashMap <Integer, CTEvidence> ctEvidenceMap = new HashMap<Integer, CTEvidence>();
@@ -345,10 +358,15 @@ public class MPEvidenceService  extends AbstractDaoService {
 	return ctEvidenceMap;
     }
 
-
-    /**
+     /**
+     * @summary parse case report evidences
      * @param Case report data query results 
      * @param Case report material query results
+     * @return list of case report evidences
+     */
+    
+    /**
+
      * @return
      */
     private HashMap<Integer, CREvidence> parseCREvidences(List<Map<String, Object>> dataRows, List<Map<String, Object>> materialRows, String subject, String object, int claimId) {
@@ -443,7 +461,12 @@ public class MPEvidenceService  extends AbstractDaoService {
 	
     // }
 
-    
+    /** 
+     * @summary Query all Micropublication Claim 
+     * @param sourceKey path parameter specifying the source key identifying the
+     * source to use for access to the set of vocabulary tables
+     * @return list of Claim with Method information
+     */    
     @GET
     @Path("{sourceKey}/claim")
     @Produces(MediaType.APPLICATION_JSON)
@@ -467,7 +490,6 @@ public class MPEvidenceService  extends AbstractDaoService {
 	}
 	return claimList;
     }
-
 
     /** create drug entity instance
      * @param drug concept name

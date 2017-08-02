@@ -171,6 +171,7 @@
         </executions>
       </plugin>
       <plugin>
+	<!-- MireDot plugin & configuration -->
         <groupId>com.qmino</groupId>
         <artifactId>miredot-plugin</artifactId>
         <version>1.5.1</version>
@@ -182,10 +183,29 @@
             </goals>
           </execution>
         </executions>
+	
         <configuration>
+	  <restModel>
+            <filter>
+              <includes>
+                <include>org.ohdsi.webapi.service.MPEvidenceService</include>
+              </includes>
+              <excludes>
+                <exclude>**Test</exclude>
+              </excludes>
+            </filter>
+	  </restModel>
+	  
+	  <output>
+	    <location>/home/yin2/Documents/webapi-miredot</location>
+            <html>
+              <location>/home/yin2/Documents/webapi-miredot/html</location>
+            </html>
+	  </output>
            <licence>cHJvamVjdHxvcmcub2hkc2kuV2ViQVBJfDIwMjAtMDMtMzF8dHJ1ZXwtMSNNQzBDRkNNQ2R2ZEhjbDg0Z2tONVI3bHlmQ2Y4SnNkYUFoVUFoMkdtOUVFdy9RelpLVzM1V2p6a2FsdzJZV009</licence>
         </configuration>
       </plugin>
+      
     </plugins>
   </build>
 
