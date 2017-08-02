@@ -96,7 +96,7 @@ public class MPEvidenceService  extends AbstractDaoService {
         String [] uriList = drug1URI.split("-");
 	String vocabularyId = uriList[0];
 	String conceptCode = uriList[1];	
-    	sql_statement = sql_statement.replaceAll("@conceptcode", conceptCode).replaceAll("@vocabularyid", vocabularyId).replaceAll("@roleconceptcode", "");
+    	sql_statement = sql_statement.replaceAll("@conceptcode", conceptCode).replaceAll("@roleconceptcode", "");
 
 	List<Map<String, Object>> rows = getSourceJdbcTemplate(source).queryForList(sql_statement);
 	List<DrugEntity> drugList = new ArrayList<DrugEntity>();
@@ -126,7 +126,7 @@ public class MPEvidenceService  extends AbstractDaoService {
 
 
     /**
-     * Get method by two drug names
+     * Get method by two drug URIs
      * @param 1st drug URI <vocabId>-<concpet_code>
      * @param 2nd drug URI <vocabId>-<concpet_code>
      * @param drug role 1
@@ -378,8 +378,6 @@ public class MPEvidenceService  extends AbstractDaoService {
 		    crEvidence.reviewerlackinfo = valueStr;
 		}
 	    } else if (dataType.equals("dipsquestion")) {
-		// dataFieldType (q1, q2 - q10)
-		System.out.println(crEvidence.dipsquestion);
 		if (crEvidence.dipsquestion == null) {
 		    crEvidence.dipsquestion = new HashMap<String, String>();
 		}
